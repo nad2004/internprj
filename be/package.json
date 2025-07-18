@@ -4,16 +4,27 @@
   "description": "",
   "main": "src/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
   },
   "keywords": [],
   "author": "",
+  "type": "module",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.10.0",
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^17.2.0",
     "express": "^5.1.0",
-    "module-alias": "^2.2.3"
+    "jsonwebtoken": "^9.0.2",
+    "module-alias": "^2.2.3",
+    "mongoose": "^8.16.4",
+    "slugify": "^1.6.6"
   },
   "_moduleAliases": {
-  "@": "./src"
+    "@": "./src"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }
