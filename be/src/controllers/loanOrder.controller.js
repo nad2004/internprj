@@ -78,7 +78,7 @@ export const startCooldown = async (req, res, next) => {
     const { cooldownUntil } = req.body;
     const loan = await service.startCooldown(
       req.params.id,
-      cooldownUntil ? new Date(cooldownUntil) : null
+      cooldownUntil ? new Date(cooldownUntil) : null,
     );
     res.json(loan);
   } catch (err) {

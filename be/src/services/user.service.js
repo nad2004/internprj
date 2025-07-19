@@ -6,9 +6,8 @@ export const getAllUsers = async () => {
 };
 
 export const getUserById = async (id) => {
-  return await User.findById(id).select('-passwordHash');
+  return await User.findById(id);
 };
-
 
 export const updateUser = async (id, updates) => {
   return await User.findByIdAndUpdate(id, updates, { new: true });

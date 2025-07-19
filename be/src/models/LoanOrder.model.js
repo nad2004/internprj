@@ -5,46 +5,39 @@ const loanOrderSchema = new Schema({
   bookId: {
     type: Schema.Types.ObjectId,
     ref: 'Book',
-    required: true
+    required: true,
   },
   userId: {
     type: Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
   },
   borrowedAt: {
     type: Date,
     default: Date.now,
-    required: true
+    required: true,
   },
   dueAt: {
     type: Date,
-    required: true
+    required: true,
   },
   returnedAt: {
     type: Date,
-    default: null
+    default: null,
   },
   pickupScheduledAt: {
     type: Date,
-    default: null
+    default: null,
   },
   cooldownUntil: {
     type: Date,
-    default: null
+    default: null,
   },
   status: {
     type: String,
-    enum: [
-      'requested',               
-      'waiting_pickup',   
-      'borrowed',         
-      'returned',         
-      'overdue',          
-      'cooldown'        
-    ],
-    default: 'requested'
-  }
+    enum: ['requested', 'waiting_pickup', 'borrowed', 'returned', 'overdue', 'cooldown'],
+    default: 'requested',
+  },
 });
 
 export default mongoose.model('LoanOrder', loanOrderSchema);

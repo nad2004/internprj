@@ -6,7 +6,7 @@ const CategorySchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    trim: true
+    trim: true,
   },
 
   slug: {
@@ -14,22 +14,20 @@ const CategorySchema = new mongoose.Schema({
     required: true,
     unique: true,
     lowercase: true,
-    trim: true
+    trim: true,
   },
 
   createdBy: {
     type: String,
-    default: 'admin'
+    default: 'admin',
   },
 
   createdAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
-
-// Tự động sinh slug từ name trước khi validate
-CategorySchema.pre('validate', function(next) {
+CategorySchema.pre('validate', function (next) {
   if (this.name) {
     this.slug = slugify(this.name, { lower: true });
   }

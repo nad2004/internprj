@@ -5,38 +5,41 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    trim: true
+    trim: true,
   },
 
   email: {
     type: String,
     required: true,
     unique: true,
-    lowercase: true
+    lowercase: true,
+    trim: true,
   },
-
-  name: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  
-  password: {
-    type: String,
-    required: true
-  },
-
   role: {
     type: String,
     enum: ['admin', 'user'],
-    default: 'user'
+    default: 'user',
   },
-
+  refreshToken: {
+    type: String,
+    default: null,
+  },
+  verified: {
+    type: Boolean,
+    default: false,
+  },
+  otp: {
+    type: String,
+    default: null,
+  },
+  otpExpire: {
+    type: Date,
+    default: null,
+  },
   createdAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
-const User = mongoose.model('User', UserSchema);
-export default User;
+export default mongoose.model('User', UserSchema);

@@ -17,11 +17,7 @@ export const createCategory = async ({ name, slug }) => {
 };
 
 export const updateCategoryBySlug = async (slug, updates) => {
-  return await Category.findOneAndUpdate(
-    { slug },
-    updates,
-    { new: true }
-  );
+  return await Category.findOneAndUpdate({ slug }, updates, { new: true });
 };
 
 export const deleteCategoryBySlug = async (slug) => {

@@ -1,10 +1,5 @@
 // src/controllers/user.controller.js
-import {
-  getAllUsers,
-  getUserById,
-  updateUser,
-  deleteUser
-} from '../services/user.service.js';
+import { getAllUsers, getUserById, updateUser, deleteUser } from '../services/user.service.js';
 
 export const getUsers = async (req, res) => {
   try {
@@ -44,5 +39,3 @@ export const deleteUserById = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-
-

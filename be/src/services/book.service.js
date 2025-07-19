@@ -1,4 +1,3 @@
-
 import Book from '../models/Book.js';
 
 export const getAllBooks = async (filter = {}, options = {}) => {

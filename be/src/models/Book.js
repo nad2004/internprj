@@ -24,7 +24,7 @@ const BookSchema = new mongoose.Schema({
 
   imageLinks: {
     smallThumbnail: { type: String },
-    thumbnail: { type: String }
+    thumbnail: { type: String },
   },
   language: { type: String, trim: true },
 
@@ -36,21 +36,21 @@ const BookSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ['available', 'borrowed', 'reserved'],
-    default: 'available'
+    default: 'available',
   },
   currentHolder: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    default: null
+    default: null,
   },
   reservedUntil: { type: Date, default: null },
 
   createdBy: { type: String, default: 'admin' },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
 });
 
 // Tự động sinh slug từ tiêu đề trước khi validate
-BookSchema.pre('validate', function(next) {
+BookSchema.pre('validate', function (next) {
   if (this.title) {
     this.slug = slugify(this.title, { lower: true, strict: true });
   }
