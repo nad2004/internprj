@@ -1,8 +1,6 @@
 import nodemailer from 'nodemailer';
 import verifyEmailTemplate from '../utils/verifyEmailTemplate.js';
 import User from '../models/User.js';
-import jwt from 'jsonwebtoken';
-import { generateAccessToken, generateRefreshToken } from '../utils/jwt.js';
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -32,11 +30,9 @@ export async function verifyEmail({ email, otp }) {
   }
   user.otp = null;
   user.otpExpire = null;
-  const payload = { userId: user._id, role: user.role };
-  const token = generateAccessToken(payload);
-  const refreshToken = generateRefreshToken(payload);
-  user.refreshToken = refreshToken;
   user.verified = true;
   await user.save();
-  return { user, token };
+  const message = 'Xác thực email thành công';
+  const success = true;
+  return { message, success};
 }

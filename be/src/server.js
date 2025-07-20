@@ -1,4 +1,4 @@
-
+import cors from 'cors';
 import './jobs/deleteUnverifiedUsers.js'; 
 import express from 'express';
 import dotenv from 'dotenv';
@@ -7,11 +7,16 @@ import bookRoutes from './routes/book.routes.js';
 import userRoutes from './routes/user.routes.js';
 import categoryRoutes from './routes/category.routes.js';
 import authRoutes from './routes/auth.routes.js';
-
+import cookieParser from 'cookie-parser';
+import errorHandler from './middleware/errorHandler.js';
 dotenv.config();
 const app = express();
 app.use(express.json());
-
+app.use(cookieParser());
+app.use(cors({
+  origin: 'http://localhost:3000', 
+  credentials: true,               
+}));
 // Kết nối DB
 connectDB();
 
@@ -24,3 +29,4 @@ app.use('/api/auth', authRoutes);
 // Start server
 const PORT = process.env.PORT;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.use(errorHandler); 

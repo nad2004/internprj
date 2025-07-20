@@ -4,7 +4,6 @@ const UserSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
-    unique: true,
     trim: true,
   },
 
@@ -19,6 +18,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     enum: ['admin', 'user'],
     default: 'user',
+  },
+  avartar: {
+    type: String,
+    default: 'https://ui-avatars.com/api/?name=Guest&background=random', 
   },
   refreshToken: {
     type: String,

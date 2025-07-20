@@ -1,19 +1,25 @@
 import cron from 'node-cron';
 import User from '../models/User.js';
 import Credential from '../models/Credential.js';
+
 cron.schedule('* * * * *', async () => {
   const now = Date.now();
-  const fiveMinAgo = now - 5 * 60 * 1000;
-
-  const result = await User.deleteMany({
+  const users = await User.find({
     verified: false,
     otpExpire: { $lt: now },
   });
-  await Credential.deleteMany({
-    userId: { $in: result.deletedCount > 0 ? result.map((user) => user._id) : [] },
+
+  if (users.length === 0) return;
+
+  const userIds = users.map(user => user._id);
+
+  const userResult = await User.deleteMany({
+    _id: { $in: userIds }
+  });
+  const credResult = await Credential.deleteMany({
+    userId: { $in: userIds },
     provider: 'local',
   });
-  if (result.deletedCount > 0) {
-    console.log(`[CRON] Đã xoá ${result.deletedCount} user chưa xác thực sau 5 phút.`);
-  }
+
+  console.log(`[CRON] Đã xoá ${userResult.deletedCount} user chưa xác thực và ${credResult.deletedCount} credential sau 5 phút.`);
 });

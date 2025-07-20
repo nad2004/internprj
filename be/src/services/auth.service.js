@@ -9,14 +9,16 @@ import { generateAccessToken, generateRefreshToken } from '../utils/jwt.js';
 export async function registerLocal({ username, password, email }) {
   const existing = await User.findOne({ email });
   if (existing) {
-    throw new Error('Username hoặc email đã được sử dụng');
+    throw new Error(' Email đã được sử dụng');
   }
   const otp = generatedOtp();
+  const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(username || 'Guest')}&background=random`;
   const user = new User({
     username,
     email,
     otp,
-    otpExpire: Date.now() + 10 * 60 * 1000,
+    avartar: avatarUrl,
+    otpExpire: Date.now() + 1 * 60 * 1000,
     verified: false,
   });
   await user.save();
@@ -43,20 +45,27 @@ export async function cancelRegister({ email, otp }) {
   return { message: 'Đã huỷ đăng ký thành công.' };
 }
 export async function loginLocal({ email, password }) {
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email, verified: true });
   if (!user) {
-    throw new Error('Invalid credentials');
+    // Nên tạo error có status để errorHandler biết (VD 401 Unauthorized)
+    const err = new Error('Invalid credentials');
+    err.status = 401;
+    throw err;
   }
   const cred = await Credential.findOne({
     userId: user._id,
     provider: 'local',
   });
   if (!cred) {
-    throw new Error('Không có phương thức đăng nhập local');
+    const err = new Error('Không có phương thức đăng nhập local');
+    err.status = 400;
+    throw err;
   }
   const valid = await bcrypt.compare(password, cred.passwordHash);
   if (!valid) {
-    throw new Error('Invalid credentials');
+    const err = new Error('Invalid credentials');
+    err.status = 401;
+    throw err;
   }
   const payload = { userId: user._id, role: user.role };
   const token = generateAccessToken(payload);
@@ -66,7 +75,7 @@ export async function loginLocal({ email, password }) {
   return { user, token };
 }
 export async function loginWithGoogle(profile) {
-  const { googleId, email, name } = profile;
+  const { googleId, email, name, picture } = profile;
   let cred = await Credential.findOne({
     provider: 'google',
     providerUserId: googleId,
@@ -80,15 +89,14 @@ export async function loginWithGoogle(profile) {
     if (!user) {
       let base = email.split('@')[0];
       let username = base;
-      let suffix = 0;
       while (await User.findOne({ username })) {
-        suffix++;
-        username = `${base}${suffix}`;
+        username = `${base}`;
       }
       user = await User.create({
         username,
         email,
         name,
+        avartar: picture,
         verified: true,
       });
     }
