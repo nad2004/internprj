@@ -3,12 +3,12 @@ import User from '../types/User';
 
 // Định nghĩa interface cho state
 interface UserState {
-  user: User | null;
+  profile: User | null;
 }
 
 // Giá trị khởi tạo
 const initialState: UserState = {
-  user: null,
+  profile: null,
 };
 
 const userSlice = createSlice({
@@ -16,10 +16,10 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     setUser(state, action: PayloadAction<User>) {
-      state.user = action.payload;
+      state.profile = action.payload;
     },
     logout(state) {
-      state.user = null;
+      state.profile = null;
     },
   },
 });

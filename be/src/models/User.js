@@ -19,9 +19,9 @@ const UserSchema = new mongoose.Schema({
     enum: ['admin', 'user'],
     default: 'user',
   },
-  avartar: {
+  avatar: {
     type: String,
-    default: 'https://ui-avatars.com/api/?name=Guest&background=random', 
+    default: 'https://ui-avatars.com/api/?name=Guest&background=random',
   },
   refreshToken: {
     type: String,

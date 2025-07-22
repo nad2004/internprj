@@ -12,9 +12,13 @@ export function useRegister() {
 }
 export function useVerifyOtp() {
   const verifyOtp = async (email: string, otp: string) => {
-    const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/verify-email`, { email, otp }, {
-      withCredentials: true,
-    });
+    const res = await axios.post(
+      `${process.env.NEXT_PUBLIC_API_URL}/auth/verify-email`,
+      { email, otp },
+      {
+        withCredentials: true,
+      },
+    );
     return res.data;
   };
   return { verifyOtp };

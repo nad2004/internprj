@@ -18,6 +18,7 @@ export async function verifyGoogleIdToken(idToken) {
       picture: payload.picture,
     };
   } catch (err) {
+    console.log('Google ID token verification failed:', err);
     throw new Error('Google xác thực token thất bại');
   }
 }

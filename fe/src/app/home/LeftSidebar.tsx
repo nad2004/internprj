@@ -1,3 +1,4 @@
+"use client";
 import {
   FaBookOpen,
   FaSearch,
@@ -9,6 +10,9 @@ import {
 } from 'react-icons/fa';
 import NavigateButton from '@/components/NavigateButton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { useSelector } from "react-redux";
+import { RootState } from "@/store"; 
+
 const menuItems = [
   {
     label: 'Book Overview',
@@ -37,17 +41,18 @@ const menuItems = [
   },
 ];
 export default function LeftSidebar() {
+  const profile = useSelector((state: RootState) => state.user.profile);
   return (
     <aside className="w-64 bg-black text-white flex flex-col min-h-screen">
       {/* User info */}
       <div className="flex items-center gap-3 p-3 rounded-t-lg bg-[#18191b]">
         <Avatar className="w-10 h-10 border border-gray-700">
-          <AvatarImage src="/avatar.png" alt="User" />
+          <AvatarImage src={profile?.avatar} alt="User" />
           <AvatarFallback>U</AvatarFallback>
         </Avatar>
         <div className="flex flex-col justify-center">
-          <span className="text-base font-semibold leading-tight">Library Manager</span>
-          <span className="text-xs text-gray-300">admin@library.com</span>
+          <span className="text-base font-semibold leading-tight">{profile?.username}</span>
+          <span className="text-xs text-gray-300">{profile?.email}</span>
         </div>
       </div>
 

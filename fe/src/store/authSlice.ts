@@ -1,5 +1,5 @@
 // authSlice.ts
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice } from '@reduxjs/toolkit';
 
 interface AuthState {
   loading: boolean;
@@ -10,20 +10,20 @@ const initialState: AuthState = {
 };
 
 const authSlice = createSlice({
-  name: "auth",
+  name: 'auth',
   initialState,
   reducers: {
-    registerStart(state) {
+    authStart(state) {
       state.loading = true;
     },
-    registerSuccess(state) {
+    authSuccess(state) {
       state.loading = false;
     },
-    registerFailure(state, action) {
+    authFailure(state, action) {
       state.loading = false;
     },
   },
 });
 
-export const { registerStart, registerSuccess, registerFailure } = authSlice.actions;
+export const { authStart, authSuccess, authFailure } = authSlice.actions;
 export default authSlice.reducer;

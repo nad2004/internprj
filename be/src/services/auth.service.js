@@ -17,7 +17,7 @@ export async function registerLocal({ username, password, email }) {
     username,
     email,
     otp,
-    avartar: avatarUrl,
+    avatar: avatarUrl,
     otpExpire: Date.now() + 1 * 60 * 1000,
     verified: false,
   });
@@ -48,7 +48,7 @@ export async function loginLocal({ email, password }) {
   const user = await User.findOne({ email, verified: true });
   if (!user) {
     // Nên tạo error có status để errorHandler biết (VD 401 Unauthorized)
-    const err = new Error('Invalid credentials');
+    const err = new Error('Invalid email');
     err.status = 401;
     throw err;
   }
@@ -63,7 +63,7 @@ export async function loginLocal({ email, password }) {
   }
   const valid = await bcrypt.compare(password, cred.passwordHash);
   if (!valid) {
-    const err = new Error('Invalid credentials');
+    const err = new Error('Invalid password');
     err.status = 401;
     throw err;
   }
@@ -72,7 +72,13 @@ export async function loginLocal({ email, password }) {
   const refreshToken = generateRefreshToken(payload);
   user.refreshToken = refreshToken;
   await user.save();
-  return { user, token };
+  return { user: {
+    id: user._id,
+    username: user.username,
+    email: user.email,
+    role: user.role,
+    avatar: user.avatar, 
+  }, token };
 }
 export async function loginWithGoogle(profile) {
   const { googleId, email, name, picture } = profile;
@@ -92,11 +98,12 @@ export async function loginWithGoogle(profile) {
       while (await User.findOne({ username })) {
         username = `${base}`;
       }
+      
       user = await User.create({
         username,
         email,
         name,
-        avartar: picture,
+        avatar: picture,
         verified: true,
       });
     }
@@ -112,5 +119,11 @@ export async function loginWithGoogle(profile) {
   user.refreshToken = refreshToken;
   await user.save();
 
-  return { user, token };
+  return { user: {
+    id: user._id,
+    username: user.username,
+    email: user.email,
+    role: user.role,
+    avatar: user.avatar, 
+  }, token };
 }

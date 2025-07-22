@@ -1,5 +1,11 @@
 import * as React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 
@@ -44,7 +50,7 @@ export function VerifyOtpDialog({
             render={({ slots }) => (
               <InputOTPGroup>
                 {slots.map((slot, i) => (
-                  <InputOTPSlot  key={i} {...slot} />
+                  <InputOTPSlot key={i} {...slot} />
                 ))}
               </InputOTPGroup>
             )}

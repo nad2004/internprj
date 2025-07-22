@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 export default function Register() {
   return (
-   <div className="min-h-screen flex flex-col items-center justify-center bg-[#fcfafa]">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#fcfafa]">
       <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-md">
         <h2 className="text-3xl font-bold mb-8 text-center text-gray-900">Create Account</h2>
         <RegisterForm />

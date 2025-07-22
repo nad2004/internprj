@@ -1,7 +1,12 @@
-import { registerLocal, loginLocal, loginWithGoogle, cancelRegister } from '../services/auth.service.js';
+import {
+  registerLocal,
+  loginLocal,
+  loginWithGoogle,
+  cancelRegister,
+} from '../services/auth.service.js';
 import { verifyGoogleIdToken } from '../services/googleOAuth.service.js';
 import { verifyEmail } from '../services/mail.service.js';
-import { accessTokenCookieOptions  } from '../config/cookieOptions.js';
+import { accessTokenCookieOptions } from '../config/cookieOptions.js';
 import { respondSuccess } from '../utils/respond.js';
 export async function signupLocal(req, res, next) {
   try {
@@ -27,7 +32,7 @@ export async function googleCredentialLogin(req, res, next) {
     const { credential } = req.body;
     if (!credential) throw new Error('Thiếu credential');
     const profile = await verifyGoogleIdToken(credential);
-    const { user, token } = await loginWithGoogle(profile); 
+    const { user, token } = await loginWithGoogle(profile);
     res.cookie('accessToken', token, accessTokenCookieOptions);
     respondSuccess(res, { data: user });
   } catch (err) {

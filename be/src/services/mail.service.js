@@ -34,5 +34,5 @@ export async function verifyEmail({ email, otp }) {
   await user.save();
   const message = 'Xác thực email thành công';
   const success = true;
-  return { message, success};
+  return { message, success };
 }
