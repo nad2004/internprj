@@ -1,10 +1,10 @@
 import * as service from '../services/loan.service.js';
-
+import { respondSuccess } from '../utils/respond.js';
 /** POST /loans */
 export const createLoan = async (req, res, next) => {
   try {
     const loan = await service.createLoan(req.body);
-    res.status(201).json(loan);
+    respondSuccess(res, { data: loan });
   } catch (err) {
     next(err);
   }
@@ -14,7 +14,7 @@ export const createLoan = async (req, res, next) => {
 export const getAllLoans = async (req, res, next) => {
   try {
     const loans = await service.getAllLoans();
-    res.json(loans);
+    respondSuccess(res, { data: loans });
   } catch (err) {
     next(err);
   }
@@ -25,7 +25,7 @@ export const getLoanById = async (req, res, next) => {
   try {
     const loan = await service.getLoanById(req.params.id);
     if (!loan) return res.status(404).json({ message: 'Not found' });
-    res.json(loan);
+    respondSuccess(res, { data: loan });
   } catch (err) {
     next(err);
   }
@@ -36,7 +36,7 @@ export const updateLoan = async (req, res, next) => {
   try {
     const loan = await service.updateLoan(req.params.id, req.body);
     if (!loan) return res.status(404).json({ message: 'Not found' });
-    res.json(loan);
+    respondSuccess(res, { data: loan });
   } catch (err) {
     next(err);
   }
@@ -46,7 +46,7 @@ export const updateLoan = async (req, res, next) => {
 export const deleteLoan = async (req, res, next) => {
   try {
     await service.deleteLoan(req.params.id);
-    res.status(204).end();
+    respondSuccess(res, { message: 'Loan deleted successfully' });
   } catch (err) {
     next(err);
   }
@@ -56,7 +56,7 @@ export const deleteLoan = async (req, res, next) => {
 export const returnBook = async (req, res, next) => {
   try {
     const loan = await service.markReturned(req.params.id);
-    res.json(loan);
+    respondSuccess(res, { data: loan });
   } catch (err) {
     next(err);
   }
@@ -66,7 +66,7 @@ export const returnBook = async (req, res, next) => {
 export const confirmLoan = async (req, res, next) => {
   try {
     const loan = await service.confirmLoan(req.params.id);
-    res.json(loan);
+    respondSuccess(res, { data: loan });
   } catch (err) {
     next(err);
   }
@@ -80,7 +80,7 @@ export const startCooldown = async (req, res, next) => {
       req.params.id,
       cooldownUntil ? new Date(cooldownUntil) : null,
     );
-    res.json(loan);
+    respondSuccess(res, { data: loan });
   } catch (err) {
     next(err);
   }

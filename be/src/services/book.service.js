@@ -1,5 +1,6 @@
 import Book from '../models/Book.js';
 import BookInstance from '../models/BookInstance.js';
+import redisClient from '../utils/redis.js';
 export const getAllBooks = async (filter = {}, options = {}) => {
   const books = await Book.find(filter, null, options);
   return books;
@@ -15,4 +16,19 @@ export const getBookStats = async (bookId) => {
     status: 'available',
   });
   return { total, available };
+};
+export const getBookTrending = async () => {
+  const cacheKey = 'trending_books';
+  const cachedBooks = await redisClient.get(cacheKey);
+  if (cachedBooks) {
+    return JSON.parse(cachedBooks);
+  }
+
+  const books = await Book.find({})
+    .sort({ borrowedCount: -1 })
+    .limit(4)
+    .populate('categories', 'name')
+    .lean();
+  await redisClient.set(cacheKey, JSON.stringify(books), { EX: 3600 });
+  return books;
 };

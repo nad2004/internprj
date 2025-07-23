@@ -14,7 +14,7 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
         {/* Nếu bạn dùng header sticky ở đây, thêm vào */}
         <div className="flex-1 flex flex-row overflow-hidden">
           <section className="flex-1 pt-6 overflow-auto">{children}</section>
-          <aside className="w-80 h-[100vh] sticky top-0 border-l border-gray-200 bg-white p-2">
+          <aside className="w-110 h-full sticky top-0 border-l border-gray-200 bg-white p-4">
             <Suspense fallback={<div>Loading...</div>}>
               <RightSidebar />
             </Suspense>

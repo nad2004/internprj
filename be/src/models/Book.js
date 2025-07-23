@@ -32,7 +32,6 @@ const BookSchema = new mongoose.Schema({
   infoLink: { type: String },
   canonicalVolumeLink: { type: String },
 
-  // Trạng thái quản lý thư viện
   status: {
     type: String,
     enum: ['available', 'unavailable'],
@@ -44,7 +43,6 @@ const BookSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-// Tự động sinh slug từ tiêu đề trước khi validate
 BookSchema.pre('validate', function (next) {
   if (this.title) {
     this.slug = slugify(this.title, { lower: true, strict: true });

@@ -3,7 +3,7 @@ import { FaHistory, FaBookOpen, FaCalendarAlt, FaArrowRight } from 'react-icons/
 
 export default function RightSidebar() {
   return (
-    <aside className="w-80 h-full flex flex-col space-y-6 bg-transparent">
+    <aside className="w-full h-full flex flex-col space-y-6 bg-transparent">
       {/* Notifications */}
       <div className="font-bold text-xl mt-1">Notifications</div>
       <div className="bg-white rounded-xl shadow p-4 flex items-start justify-between">

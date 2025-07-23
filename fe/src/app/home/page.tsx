@@ -1,6 +1,6 @@
 import Header from './Header';
 import CardModules from './CardModules';
-import Calendar from './Calendar';
+import CalendarUI from './Calendar';
 import { Suspense } from 'react';
 export default function Home() {
   return (
@@ -11,7 +11,7 @@ export default function Home() {
       <div className="p-6 flex flex-col gap-6 flex-1 ">
         <Suspense fallback={<div>Loading...</div>}>
           <CardModules />
-          <Calendar />
+          <CalendarUI />
         </Suspense>
       </div>
     </div>

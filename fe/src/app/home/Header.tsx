@@ -1,9 +1,13 @@
 import { FaMessage } from 'react-icons/fa6';
 import Input from '@/components/Input';
+import BookLogo from '@/components/BookLogo';
 export default function Header() {
   return (
     <>
-      <h1 className="text-2xl font-bold">Library Dashboard</h1>
+      <div className="flex items-center gap-3">
+        <h1 className="text-2xl font-bold">Library Dashboard</h1>
+        <BookLogo />
+      </div>
       <div className="flex items-center gap-3">
         <Input
           // value={search}

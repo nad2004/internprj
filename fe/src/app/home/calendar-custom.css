@@ -1,0 +1,61 @@
+.react-calendar {
+  border: none !important;
+  background: none !important;
+  font-family: inherit;
+  width: 100%;
+}
+
+.react-calendar__month-view__weekdays {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280; /* Tailwind gray-500 */
+  background: none;
+  border: none;
+}
+
+.react-calendar__month-view__days {
+  border-radius: 12px;
+  border: 1px solid #e5e7eb; /* Tailwind gray-200 */
+  overflow: hidden;
+}
+
+.react-calendar__tile {
+  border: 1px solid #e5e7eb; /* Tailwind gray-200 */
+  border-radius: 0 !important;
+  min-height: 94px;
+  padding: 0 0.5rem 0.25rem 0.5rem;
+  vertical-align: top;
+  background: white;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.react-calendar__tile--now {
+  background: #f3f4f6 !important; /* Tailwind gray-100 */
+}
+
+.react-calendar__tile--active {
+  background: transparent !important;
+  color: inherit !important;
+}
+
+.react-calendar__month-view__days__day--neighboringMonth {
+  visibility: hidden; /* Không hiển thị ngày tháng khác */
+}
+
+.date-number {
+  position: absolute;
+  top: 6px;
+  left: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151; /* Tailwind gray-700 */
+}
+.react-calendar__tile abbr {
+  display: none;
+}
+.react-calendar__navigation span {
+  text-transform: uppercase !important;
+  font-size: large;
+  font-weight: 600;
+}

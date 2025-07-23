@@ -42,7 +42,6 @@ const menuItems = [
 ];
 export default function LeftSidebar() {
   const profile = useSelector((state: RootState) => state.user.profile);
-  console.log('Profile:', profile);
   const handleLogout = useLogout(profile?.id || '');
   return (
     <aside className="w-64 bg-black text-white flex flex-col min-h-screen">
