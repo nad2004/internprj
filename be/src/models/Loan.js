@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 const { Schema } = mongoose;
 
-const loanOrderSchema = new Schema({
+const loanSchema = new Schema({
   bookId: {
     type: Schema.Types.ObjectId,
     ref: 'Book',
@@ -35,9 +35,9 @@ const loanOrderSchema = new Schema({
   },
   status: {
     type: String,
-    enum: ['requested', 'waiting_pickup', 'borrowed', 'returned', 'overdue', 'cooldown'],
-    default: 'requested',
+    enum: ['borrowed', 'returned', 'overdue', 'cooldown'],
+    default: 'borrowed',
   },
 });
 
-export default mongoose.model('LoanOrder', loanOrderSchema);
+export default mongoose.model('Loan', loanSchema);

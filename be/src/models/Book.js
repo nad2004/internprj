@@ -35,15 +35,10 @@ const BookSchema = new mongoose.Schema({
   // Trạng thái quản lý thư viện
   status: {
     type: String,
-    enum: ['available', 'borrowed', 'reserved'],
+    enum: ['available', 'unavailable'],
     default: 'available',
   },
-  currentHolder: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    default: null,
-  },
-  reservedUntil: { type: Date, default: null },
+  quantity: { type: Number, default: 0 },
 
   createdBy: { type: String, default: 'admin' },
   createdAt: { type: Date, default: Date.now },

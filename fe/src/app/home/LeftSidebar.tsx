@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import {
   FaBookOpen,
   FaSearch,
@@ -10,9 +10,9 @@ import {
 } from 'react-icons/fa';
 import NavigateButton from '@/components/NavigateButton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { useSelector } from "react-redux";
-import { RootState } from "@/store"; 
-
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store';
+import useLogout from '@/hooks/useLogout';
 const menuItems = [
   {
     label: 'Book Overview',
@@ -42,13 +42,15 @@ const menuItems = [
 ];
 export default function LeftSidebar() {
   const profile = useSelector((state: RootState) => state.user.profile);
+  console.log('Profile:', profile);
+  const handleLogout = useLogout(profile?.id || '');
   return (
     <aside className="w-64 bg-black text-white flex flex-col min-h-screen">
       {/* User info */}
       <div className="flex items-center gap-3 p-3 rounded-t-lg bg-[#18191b]">
         <Avatar className="w-10 h-10 border border-gray-700">
-          <AvatarImage src={profile?.avatar} alt="User" />
-          <AvatarFallback>U</AvatarFallback>
+          <AvatarImage key={profile?.avatar} src={profile?.avatar} alt="User" />
+          <AvatarFallback>{profile?.username?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
         </Avatar>
         <div className="flex flex-col justify-center">
           <span className="text-base font-semibold leading-tight">{profile?.username}</span>
@@ -78,7 +80,10 @@ export default function LeftSidebar() {
         <button className="flex items-center gap-2 p-4 hover:bg-gray-800 rounded-md text-left">
           <FaCog className="text-base" /> Settings
         </button>
-        <button className="flex items-center gap-2 p-4 hover:bg-gray-800 rounded-md text-left">
+        <button
+          className="flex items-center gap-2 p-4 hover:bg-gray-800 rounded-md text-left"
+          onClick={handleLogout}
+        >
           <FaSignOutAlt className="text-base" /> Log out
         </button>
       </div>

@@ -26,7 +26,7 @@ export default function GoogleLoginButton() {
       dispatch(setUser(response.data.data));
       dispatch(authSuccess());
       alert('Login successful!');
-      router.push('/home'); 
+      router.push('/home');
     } catch (error) {
       console.error('Google login failed:', error);
       dispatch(authFailure('Google login failed!'));
@@ -36,7 +36,7 @@ export default function GoogleLoginButton() {
 
   return (
     <GoogleOAuthProvider clientId={clientId}>
-    <FormOverlay loading={loading} />
+      <FormOverlay loading={loading} />
       <GoogleLogin
         onSuccess={handleSuccess}
         onError={() => alert('Google Login Failed')}

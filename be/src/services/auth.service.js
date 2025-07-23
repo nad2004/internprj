@@ -4,7 +4,7 @@ import Credential from '../models/Credential.js';
 import bcrypt from 'bcryptjs';
 import generatedOtp from '../utils/generatedOtp.js';
 import { sendMail } from './mail.service.js';
-import { generateAccessToken, generateRefreshToken } from '../utils/jwt.js';
+import { generateAccessToken, generateRefreshToken, verifyAccessToken } from '../utils/jwt.js';
 
 export async function registerLocal({ username, password, email }) {
   const existing = await User.findOne({ email });
@@ -72,13 +72,16 @@ export async function loginLocal({ email, password }) {
   const refreshToken = generateRefreshToken(payload);
   user.refreshToken = refreshToken;
   await user.save();
-  return { user: {
-    id: user._id,
-    username: user.username,
-    email: user.email,
-    role: user.role,
-    avatar: user.avatar, 
-  }, token };
+  return {
+    user: {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      avatar: user.avatar,
+    },
+    token,
+  };
 }
 export async function loginWithGoogle(profile) {
   const { googleId, email, name, picture } = profile;
@@ -98,7 +101,7 @@ export async function loginWithGoogle(profile) {
       while (await User.findOne({ username })) {
         username = `${base}`;
       }
-      
+
       user = await User.create({
         username,
         email,
@@ -119,11 +122,41 @@ export async function loginWithGoogle(profile) {
   user.refreshToken = refreshToken;
   await user.save();
 
-  return { user: {
-    id: user._id,
-    username: user.username,
-    email: user.email,
-    role: user.role,
-    avatar: user.avatar, 
-  }, token };
+  return {
+    user: {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      avatar: user.avatar,
+    },
+    token,
+  };
+}
+export async function refreshToken(token) {
+  const payload = verifyAccessToken(token);
+  if (!payload) {
+    const err = new Error('Invalid refresh token');
+    err.status = 401;
+    throw err;
+  }
+  const user = await User.findById(payload.userId);
+  if (!user || user.refreshToken !== token) {
+    const err = new Error('Invalid refresh token');
+    err.status = 401;
+    throw err;
+  }
+  const newToken = generateAccessToken({ userId: user._id, role: user.role });
+  return { token: newToken };
+}
+export async function logout(userId) {
+  const user = await User.findById(userId);
+  if (!user) {
+    const err = new Error('User not found');
+    err.status = 404;
+    throw err;
+  }
+  user.refreshToken = null;
+  await user.save();
+  return { message: 'Logged out successfully' };
 }

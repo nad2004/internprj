@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 import verifyEmailTemplate from '../utils/verifyEmailTemplate.js';
 import User from '../models/User.js';
+import redisClient from '../utils/redis.js';
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -11,28 +12,34 @@ const transporter = nodemailer.createTransport({
 
 export async function sendMail({ to, subject, name, otp }) {
   const mailOptions = {
-    from: `"Thư Viện: " <${process.env.MAIL_USER}>`,
+    from: `"Thư Viện" <${process.env.MAIL_USER}>`,
     to,
     subject,
     html: verifyEmailTemplate({ name, otp }),
   };
+
+  await redisClient.set(`verify_otp_${email}`, otp, { EX: 300 });
+
   return transporter.sendMail(mailOptions);
 }
 
 export async function verifyEmail({ email, otp }) {
-  const user = await User.findOne({ email, otp });
+  const redisKey = `verify_otp_${email}`;
+  const storedOtp = await redisClient.get(redisKey);
 
+  if (!storedOtp || storedOtp !== otp) {
+    throw new Error('OTP không đúng hoặc đã hết hạn!');
+  }
+
+  // Nếu đúng OTP, cập nhật User là verified
+  const user = await User.findOne({ email });
   if (!user) {
-    throw new Error('OTP không đúng!');
+    throw new Error('User không tồn tại!');
   }
-  if (user.otpExpire < Date.now()) {
-    throw new Error('OTP đã hết hạn!');
-  }
-  user.otp = null;
-  user.otpExpire = null;
   user.verified = true;
   await user.save();
-  const message = 'Xác thực email thành công';
-  const success = true;
-  return { message, success };
+
+  await redisClient.del(redisKey);
+
+  return { message: 'Xác thực email thành công', success: true };
 }

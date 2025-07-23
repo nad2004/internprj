@@ -2,7 +2,7 @@
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRegister, useVerifyOtp } from './useRegister';
+import { useRegister, useVerifyOtp } from '../../hooks/useRegister';
 import { VerifyOtpDialog } from '@/components/VerifyOtpDialog';
 import { useState } from 'react';
 import { RootState, AppDispatch } from '@/store';
@@ -38,9 +38,9 @@ export default function RegisterForm() {
     dispatch(authStart());
     try {
       await registerUser(data);
-      setRegisteredEmail(data.email); 
+      setRegisteredEmail(data.email);
       setOpenVerifyOtp(true);
-      dispatch(authSuccess()); 
+      dispatch(authSuccess());
     } catch (error: any) {
       alert(error.response?.data?.error || 'Đăng ký thất bại!');
       dispatch(authFailure('Đăng ký thất bại!'));
@@ -58,7 +58,7 @@ export default function RegisterForm() {
       alert(error.response?.data?.error || 'Xác thực OTP thất bại!');
     }
   };
-  
+
   return (
     <>
       <div className="relative">
