@@ -1,5 +1,5 @@
 import { FaMessage } from 'react-icons/fa6';
-import Input from '@/components/Input';
+import Input from '@/components/SearchInput';
 import BookLogo from '@/components/BookLogo';
 export default function Header() {
   return (
