@@ -5,8 +5,8 @@ import './calendar-custom.css'; // Thêm dòng này
 
 export default function CalendarUI() {
   const events: Record<string, { title: string; desc?: string; action?: string }> = {
-    '2025-07-24': { title: 'Library Catalog', desc: 'Room 101\n3 PM' },
-    '2025-07-26': { title: 'Book Review', desc: '10 AM, Online' },
+    '2025-08-24': { title: 'Library Catalog', desc: 'Room 101\n3 PM' },
+    '2025-08-26': { title: 'Book Review', desc: '10 AM, Online' },
   };
 
   return (

@@ -1,12 +1,10 @@
-// hooks/useLogout.ts
-import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
-import type { AppDispatch } from '@/store';
-import { logout } from '@/store/userSlice';
+import { useUserStore } from '@/store/userStore';
+
 import axios from 'axios';
 export default function useLogout(userId: string) {
   const router = useRouter();
-  const dispatch = useDispatch<AppDispatch>();
+  const logout = useUserStore((state) => state.logout);
   return async function handleLogout() {
     try {
       await axios.post(
@@ -17,8 +15,8 @@ export default function useLogout(userId: string) {
         },
       );
       alert('Đăng xuất thành công!');
-      dispatch(logout());
-      router.push('/login'); // Chuyển hướng đến trang đăng nhập sau khi đăng xuất
+      logout();
+      router.push('/login');
     } catch (error) {
       console.error('Logout failed:', error);
       alert('Đăng xuất thất bại!');

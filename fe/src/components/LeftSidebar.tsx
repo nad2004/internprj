@@ -4,10 +4,8 @@ import { ReactNode } from 'react';
 import { useState } from 'react';
 import NavigateButton from '@/components/NavigateButton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store';
 import useLogout from '@/hooks/useLogout';
-
+import { useUserStore } from '@/store/userStore';
 type MenuItem = {
   label: string;
   href: string;
@@ -16,7 +14,7 @@ type MenuItem = {
 
 export default function LeftSidebar({ menuItems }: { menuItems?: MenuItem[] }) {
   const [collapsed, setCollapsed] = useState(false);
-  const profile = useSelector((state: RootState) => state.user.profile);
+  const profile = useUserStore((state) => state.profile);
   const handleLogout = useLogout(profile?.id || '');
   return (
     <aside

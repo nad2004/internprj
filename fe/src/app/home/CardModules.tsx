@@ -4,7 +4,6 @@ import type { Book } from '@/types/Books';
 import { useTrendingBooks } from '@/hooks/useTrendingBooks';
 export default function CardModules() {
   const { data: trendingBooks, isLoading } = useTrendingBooks();
-  console.log('Trending Books:', trendingBooks);
   if (isLoading) {
     return <div>Loading...</div>;
   }

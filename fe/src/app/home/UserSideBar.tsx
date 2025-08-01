@@ -6,8 +6,8 @@ import CatalogIcon from '@/icons/CatalogIcon.svg';
 
 const menuItems = [
   {
-    label: 'Book Overview',
-    href: '/book-overview',
+    label: 'Dashboard',
+    href: '/dashboard',
     icon: <DashboardIcon className="text-white" />,
   },
   {
