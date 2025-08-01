@@ -2,7 +2,7 @@ import Book from '../models/Book.js';
 import BookInstance from '../models/BookInstance.js';
 import redisClient from '../utils/redis.js';
 export const getAllBooks = async (filter = {}, options = {}) => {
-  const books = await Book.find(filter, null, options);
+  const books = await Book.find(filter, null, options).populate('categories', 'name').lean();
   return books;
 };
 

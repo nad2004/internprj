@@ -57,7 +57,7 @@ export default function BorrowingHistoryPage() {
   const [selectedUser, setSelectedUser] = useState('');
 
   const filtered = records.filter((r) =>
-    [r.title, r.borrowDate, r.returnDate].join(' ').toLowerCase().includes(search.toLowerCase())
+    [r.title, r.borrowDate, r.returnDate].join(' ').toLowerCase().includes(search.toLowerCase()),
   );
 
   return (

@@ -51,7 +51,7 @@ export default function ManageUsersPage() {
     [user.name, user.email, user.phone, user.role]
       .join(' ')
       .toLowerCase()
-      .includes(query.toLowerCase())
+      .includes(query.toLowerCase()),
   );
 
   const handleDelete = (email: string) => {
