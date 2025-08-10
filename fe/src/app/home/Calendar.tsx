@@ -15,6 +15,7 @@ export default function CalendarUI() {
         <div className="font-bold text-base">Your Library</div>
       </div>
       <Calendar
+        locale="en-US"
         calendarType="gregory"
         defaultActiveStartDate={new Date()}
         tileContent={({ date, view }) => {

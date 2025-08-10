@@ -17,8 +17,7 @@ export async function sendMail({ to, subject, name, otp }) {
     subject,
     html: verifyEmailTemplate({ name, otp }),
   };
-
-  await redisClient.set(`verify_otp_${email}`, otp, { EX: 300 });
+  await redisClient.set(`verify_otp_${to}`, otp, { EX: 300 });
 
   return transporter.sendMail(mailOptions);
 }

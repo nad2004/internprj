@@ -4,7 +4,7 @@ import slugify from 'slugify';
 const BookSchema = new mongoose.Schema({
   googleId: { type: String, unique: true },
   title: { type: String, required: true, trim: true },
-  subtitle: { type: String, trim: true },
+  subtitle: { type: String, trim: true, default: '' },
   slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
 
   authors: [{ type: String, trim: true }],
@@ -12,9 +12,9 @@ const BookSchema = new mongoose.Schema({
   publishedDate: { type: String, trim: true },
   description: { type: String },
 
-  isbn10: { type: String, trim: true },
-  isbn13: { type: String, trim: true },
-  pageCount: { type: Number },
+  isbn10: { type: String, trim: true, default: '' },
+  isbn13: { type: String, trim: true, default: '' },
+  pageCount: { type: Number, default: 0 },
 
   // liên kết đến Category bằng ObjectId
   categories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],
@@ -23,8 +23,14 @@ const BookSchema = new mongoose.Schema({
   ratingsCount: { type: Number },
 
   imageLinks: {
-    smallThumbnail: { type: String },
-    thumbnail: { type: String },
+    smallThumbnail: {
+      type: String,
+      default: 'https://neelkanthpublishers.com/assets/bookcover_cover.png',
+    },
+    thumbnail: {
+      type: String,
+      default: 'https://neelkanthpublishers.com/assets/bookcover_cover.png',
+    },
   },
   language: { type: String, trim: true },
 

@@ -1,5 +1,6 @@
 import * as bookService from '../services/book.service.js';
 import { respondSuccess } from '../utils/respond.js';
+
 export const getBooks = async (req, res) => {
   try {
     const books = await bookService.getAllBooks();
@@ -30,5 +31,23 @@ export const getBookTrending = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
+  }
+};
+export const createSimpleController = async (req, res, next) => {
+  try {
+    const { title, author, date, categories, description } = req.body;
+    const book = await bookService.createBookSimple({
+      title,
+      author,
+      date,
+      categories,
+      description,
+    });
+    res.status(201).json({ message: 'Book created', data: book });
+  } catch (e) {
+    if (e?.code === 11000) {
+      return res.status(409).json({ message: 'Duplicate key', detail: e?.keyValue });
+    }
+    next(e);
   }
 };

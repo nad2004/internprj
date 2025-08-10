@@ -6,4 +6,5 @@ const router = express.Router();
 router.get('/', bookController.getBooks);
 router.get('/:slug/detail', bookController.getBookDetailWithStatsBySlug);
 router.get('/trending', bookController.getBookTrending);
+router.post('/create-one', bookController.createSimpleController);
 export default router;

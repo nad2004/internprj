@@ -6,9 +6,7 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className="min-h-screen bg-[#fafbfc]">
       <aside className="fixed left-0 top-0 h-screen  bg-black text-white flex flex-col z-20">
-        <Suspense fallback={<div>Loading...</div>}>
-          <UserSideBar />
-        </Suspense>
+        <UserSideBar />
       </aside>
       <div className="ml-64 flex flex-col min-h-screen">
         {/* Nếu bạn dùng header sticky ở đây, thêm vào */}

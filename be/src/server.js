@@ -7,7 +7,6 @@ import bookRoutes from './routes/book.routes.js';
 import userRoutes from './routes/user.routes.js';
 import categoryRoutes from './routes/category.routes.js';
 import authRoutes from './routes/auth.routes.js';
-import reservationRoutes from './routes/reservation.routes.js';
 import bookInstanceRoutes from './routes/bookInstance.routes.js';
 import cookieParser from 'cookie-parser';
 import errorHandler from './middleware/errorHandler.js';
@@ -29,7 +28,6 @@ app.use('/api/book', bookRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/category', categoryRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/reservation', reservationRoutes);
 app.use('/api/book-instances', bookInstanceRoutes);
 
 const PORT = process.env.PORT;

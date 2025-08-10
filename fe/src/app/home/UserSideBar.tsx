@@ -3,6 +3,7 @@ import DashboardIcon from '@/icons/DashboardIcon.svg';
 import UserIcon from '@/icons/UserIcon.svg';
 import BookIcon from '@/icons/BookIcon.svg';
 import CatalogIcon from '@/icons/CatalogIcon.svg';
+import LeftSidebar from '@/components/LeftSidebar';
 
 const menuItems = [
   {
@@ -26,7 +27,6 @@ const menuItems = [
     icon: <UserIcon className="text-white " />,
   },
 ];
-import LeftSidebar from '@/components/LeftSidebar';
 export default function UserSideBar() {
   return (
     <>

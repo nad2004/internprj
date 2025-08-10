@@ -38,6 +38,10 @@ const loanSchema = new Schema({
     enum: ['borrowed', 'returned', 'overdue', 'cooldown'],
     default: 'borrowed',
   },
+  pickupScheduledAt: {
+    type: Date,
+    default: null,
+  },
 });
 
 export default mongoose.model('Loan', loanSchema);

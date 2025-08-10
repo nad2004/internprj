@@ -8,8 +8,8 @@ export function useLogin() {
     const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/login-local`, data, {
       withCredentials: true,
     });
-    setUser(response.data.user);
-    return response.data.user;
+    setUser(response.data.data);
+    return response.data.data;
   };
 
   return { login };

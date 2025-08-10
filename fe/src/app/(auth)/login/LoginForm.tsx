@@ -8,29 +8,12 @@ import { useAuthStore } from '@/store/authStore';
 import FormOverlay from '@/components/FormOverlay';
 import Link from 'next/link';
 import GoogleLoginButton from './GoogleLoginButton';
-
+import { BookwormLogo } from '@/components/BookwormLogo';
 const schema = z.object({
   email: z.string().email('Email không hợp lệ'),
   password: z.string().min(6, 'Password is required'),
 });
-const BookwormLogo = ({ className }: { className?: string }) => (
-  <svg
-    viewBox="0 0 100 100"
-    className={className}
-    fill="currentColor"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    {/* Đây là một SVG đơn giản để minh họa, bạn nên thay bằng logo thật */}
-    <circle cx="50" cy="30" r="12" />
-    <circle cx="30" cy="45" r="10" />
-    <circle cx="70" cy="50" r="10" />
-    <circle cx="50" cy="65" r="15" />
-    <circle cx="35" cy="70" r="8" />
-    <circle cx="65" cy="70" r="8" />
-    <circle cx="25" cy="25" r="5" />
-    <circle cx="75" cy="25" r="5" />
-  </svg>
-);
+
 export default function LoginForm() {
   const router = useRouter();
   const loading = useAuthStore((state) => state.loading);
@@ -50,8 +33,8 @@ export default function LoginForm() {
     try {
       await login(data);
       authSuccess();
-      alert('Đăng nhập thành công');
       router.push('/home');
+      alert('Đăng nhập thành công');
     } catch (error: any) {
       console.log('Login failed:', error);
       authFailure();
@@ -117,7 +100,6 @@ export default function LoginForm() {
           </div>
         </div>
 
-        {/* Phần bên phải - Giới thiệu */}
         <div className="w-full md:w-1/2 bg-black text-white flex flex-col justify-center items-center p-12 text-center order-1 md:order-2 rounded-l-[60px]">
           <div className="w-full max-w-sm ">
             <BookwormLogo className="w-24 h-24 text-white mx-auto mb-4" />

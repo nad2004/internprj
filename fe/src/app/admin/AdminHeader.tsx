@@ -15,17 +15,7 @@ export default function AdminHeader() {
   });
 
   return (
-    <header className="flex items-center justify-between p-4 border-b bg-white">
-      {/* Left: Admin Info */}
-      <div className="flex items-center gap-2 text-base text-gray-800">
-        <User className="w-8 h-8" />
-        <div>
-          <p className="font-bold">Nisal Gunasekara</p>
-          <p className="text-sm font-bold ">Admin</p>
-        </div>
-      </div>
-
-      {/* Right: Time, Date, Settings */}
+    <header className="flex items-center justify-end p-4 border-b bg-white">
       <div className="flex items-center gap-6">
         <div className="text-right text-sm">
           <p className="font-medium">{timeString}</p>
