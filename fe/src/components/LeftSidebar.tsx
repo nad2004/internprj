@@ -4,7 +4,7 @@ import { ReactNode } from 'react';
 import { useState } from 'react';
 import NavigateButton from '@/components/NavigateButton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import useLogout from '@/hooks/useLogout';
+import useLogout from '@/hooks/auth/useLogout';
 import { useUserStore } from '@/store/userStore';
 type MenuItem = {
   label: string;

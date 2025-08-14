@@ -43,6 +43,10 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  status: {
+    type: String,
+    default: 'active',
+  },
 });
 
 export default mongoose.model('User', UserSchema);

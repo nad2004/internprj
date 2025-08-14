@@ -2,7 +2,6 @@ import mongoose from 'mongoose';
 import slugify from 'slugify';
 
 const BookSchema = new mongoose.Schema({
-  googleId: { type: String, unique: true },
   title: { type: String, required: true, trim: true },
   subtitle: { type: String, trim: true, default: '' },
   slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
@@ -44,7 +43,7 @@ const BookSchema = new mongoose.Schema({
     default: 'available',
   },
   quantity: { type: Number, default: 0 },
-
+  deleteAt: { type: Date },
   createdBy: { type: String, default: 'admin' },
   createdAt: { type: Date, default: Date.now },
 });

@@ -2,7 +2,7 @@
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRegister, useVerifyOtp } from '../../../hooks/useRegister';
+import { useRegister, useVerifyOtp } from '../../../hooks/auth/useRegister';
 import { VerifyOtpDialog } from '@/components/VerifyOtpDialog';
 import { useState } from 'react';
 import { useAuthStore } from '@/store/authStore';

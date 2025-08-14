@@ -9,11 +9,8 @@ import BranchIcon from '@/icons/BranchIcon.svg';
 import UserIcon from '@/icons/UserIcon.svg';
 import BookIcon from '@/icons/BookIcon.svg';
 import CardInfoList from './CardInfoList';
-const dashboardStats = [
-  { label: 'Total User Base', value: '0150', icon: <UserIcon className="w-5 h-5" /> },
-  { label: 'Total Book Count', value: '01500', icon: <BookIcon className="w-5 h-5" /> },
-  { label: 'Branch Count', value: '0010', icon: <BranchIcon className="w-5 h-5" /> },
-];
+import { booksQueries } from '@/lib/api/book';
+import { useQuery } from '@tanstack/react-query';
 
 const overdueBorrowers = [
   'Sarith Gunasekara',
@@ -27,6 +24,16 @@ const admins = ['Nisal Gunasekara', 'Nisal Gunasekara', 'Nisal Gunasekara'];
 const branches = ['Branch #1', 'Branch #2', 'Branch #3'];
 
 export default function Dashboard() {
+  const { data, isError, isLoading, isRefetching, error } = useQuery({
+    ...booksQueries.list(),
+  });
+  const total = data?.pagination?.total ?? 0;
+  const dashboardStats = [
+    { label: 'Total User Base', value: '0150', icon: <UserIcon className="w-5 h-5" /> },
+    { label: 'Total Book Count', value: total, icon: <BookIcon className="w-5 h-5" /> },
+    { label: 'Branch Count', value: '0010', icon: <BranchIcon className="w-5 h-5" /> },
+  ];
+
   return (
     <div className="pt-6 ">
       <div className="grid grid-cols-4 gap-6 ">

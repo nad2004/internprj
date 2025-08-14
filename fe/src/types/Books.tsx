@@ -9,9 +9,25 @@ export interface Category {
   createdAt: string;
   createdBy: string;
 }
-
+export interface GoogleItem {
+  id: string;
+  title: string;
+  author: string;
+  date: string;
+  description: string;
+  category?: string;
+  thumbnail: string;
+}
 export type BookStatus = 'available' | 'unavailable';
-
+export interface UpdateBookInput {
+  _id?: string;
+  name?: string;
+  author?: string;
+  type?: string;
+  date?: string;
+  imageLinks?: string;
+  description?: string;
+}
 export interface Book {
   _id?: string;
   googleId?: string;

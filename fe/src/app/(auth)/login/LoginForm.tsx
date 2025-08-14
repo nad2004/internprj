@@ -1,8 +1,10 @@
 'use client';
+import axios from 'axios';
+
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useLogin } from '../../../hooks/useLogin';
+import { useLogin } from '../../../hooks/auth/useLogin';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import FormOverlay from '@/components/FormOverlay';
@@ -13,6 +15,7 @@ const schema = z.object({
   email: z.string().email('Email không hợp lệ'),
   password: z.string().min(6, 'Password is required'),
 });
+type LoginFormData = z.infer<typeof schema>;
 
 export default function LoginForm() {
   const router = useRouter();
@@ -28,17 +31,31 @@ export default function LoginForm() {
     defaultValues: { email: '', password: '' },
   });
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: LoginFormData) => {
     authStart();
     try {
       await login(data);
       authSuccess();
       router.push('/home');
       alert('Đăng nhập thành công');
-    } catch (error: any) {
-      console.log('Login failed:', error);
-      authFailure();
-      alert(error.response?.data?.error || 'Đăng nhập thất bại');
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        // Đây là AxiosError: có thể đọc response
+        const msg = error.response?.data?.error || error.message || 'Đăng nhập thất bại';
+        console.error('Axios error:', msg, error.response?.data);
+        authFailure();
+        alert(msg);
+      } else if (error instanceof Error) {
+        // Lỗi JS thông thường
+        console.error('Error message:', error.message);
+        authFailure();
+        alert('Đăng nhập thất bại');
+      } else {
+        // Bất kỳ thứ gì khác (string, number, object lạ)
+        console.error('Unknown error:', error);
+        authFailure();
+        alert('Đăng nhập thất bại');
+      }
     }
   };
 

@@ -1,9 +1,11 @@
 'use client';
 import BookTrendingCard from '@/components/BookTrendingCard';
 import type { Book } from '@/types/Books';
-import { useTrendingBooks } from '@/hooks/useTrendingBooks';
+import { useQuery } from '@tanstack/react-query';
+import { booksQueries } from '@/lib/api/book';
+
 export default function CardModules() {
-  const { data: trendingBooks, isLoading } = useTrendingBooks();
+  const { data: trendingBooks, isLoading } = useQuery(booksQueries.trending());
   if (isLoading) {
     return <div>Loading...</div>;
   }

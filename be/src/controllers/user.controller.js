@@ -22,7 +22,8 @@ export const getUser = async (req, res) => {
 
 export const updateUserInfo = async (req, res) => {
   try {
-    const user = await userService.updateUser(req.params.id, req.body);
+    const userUpdate = req.body;
+    const user = await userService.updateUser(userUpdate._id, req.body);
     if (!user) return res.status(404).json({ message: 'User not found' });
     respondSuccess(res, { data: user });
   } catch (err) {
@@ -32,7 +33,7 @@ export const updateUserInfo = async (req, res) => {
 
 export const deleteUserById = async (req, res) => {
   try {
-    const user = await userService.deleteUser(req.params.id);
+    const user = await userService.deleteUser(req.body.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
     respondSuccess(res, { message: 'User deleted successfully' });
   } catch (err) {

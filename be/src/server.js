@@ -7,10 +7,12 @@ import bookRoutes from './routes/book.routes.js';
 import userRoutes from './routes/user.routes.js';
 import categoryRoutes from './routes/category.routes.js';
 import authRoutes from './routes/auth.routes.js';
+import googleRoutes from './routes/google.routes.js';
+
 import bookInstanceRoutes from './routes/bookInstance.routes.js';
 import cookieParser from 'cookie-parser';
 import errorHandler from './middleware/errorHandler.js';
-
+import Book from './models/Book.js';
 dotenv.config();
 const app = express();
 app.use(express.json());
@@ -28,7 +30,8 @@ app.use('/api/book', bookRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/category', categoryRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/book-instances', bookInstanceRoutes);
+app.use('/api/book-instance', bookInstanceRoutes);
+app.use('/api/google', googleRoutes);
 
 const PORT = process.env.PORT;
 

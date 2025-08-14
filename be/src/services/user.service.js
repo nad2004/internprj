@@ -14,5 +14,5 @@ export const updateUser = async (id, updates) => {
 };
 
 export const deleteUser = async (id) => {
-  return await User.findByIdAndDelete(id);
+  return await User.findByIdAndUpdate(id, { status: 'ban' }, { new: true });
 };
