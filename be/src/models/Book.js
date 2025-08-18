@@ -1,9 +1,14 @@
 import mongoose from 'mongoose';
 import slugify from 'slugify';
 
+slugify.extend({ 'đ': 'd', 'Đ': 'd' }); // tiện cho TV
+const toBase = (s) => slugify(s || '', { lower: true, strict: true, trim: true });
+
 const BookSchema = new mongoose.Schema({
   title: { type: String, required: true, trim: true },
   subtitle: { type: String, trim: true, default: '' },
+
+  // slug duy nhất
   slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
 
   authors: [{ type: String, trim: true }],
@@ -15,9 +20,7 @@ const BookSchema = new mongoose.Schema({
   isbn13: { type: String, trim: true, default: '' },
   pageCount: { type: Number, default: 0 },
 
-  // liên kết đến Category bằng ObjectId
   categories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],
-  // categories: [{ type: String }],
   averageRating: { type: Number },
   ratingsCount: { type: Number },
 
@@ -37,20 +40,21 @@ const BookSchema = new mongoose.Schema({
   infoLink: { type: String },
   canonicalVolumeLink: { type: String },
 
-  status: {
-    type: String,
-    enum: ['available', 'unavailable'],
-    default: 'available',
-  },
+  status: { type: String, enum: ['available', 'unavailable'], default: 'available' },
   quantity: { type: Number, default: 0 },
-  deleteAt: { type: Date },
+
+  // ⚠️ đặt tên đúng 'deletedAt' để khớp service (trước đây file cũ là deleteAt)
+  deletedAt: { type: Date },
+
   createdBy: { type: String, default: 'admin' },
   createdAt: { type: Date, default: Date.now },
 });
 
+// Sinh slug một lần khi tạo (không tự đổi khi sửa title)
 BookSchema.pre('validate', function (next) {
-  if (this.title) {
-    this.slug = slugify(this.title, { lower: true, strict: true });
+  if (!this.slug && this.title) {
+    const suffix = (this._id?.toString() || '').slice(-8); // short id 8 ký tự
+    this.slug = `${toBase(this.title)}-${suffix}`;
   }
   next();
 });

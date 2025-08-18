@@ -11,7 +11,6 @@ export const getAllBooks = async (filter = {}, options = {}) => {
     populate = true,
     collation = { locale: 'en', strength: 2 }, // sort chữ cái không phân biệt hoa/thường
   } = options;
-
   const _page = Math.max(1, Number(page));
   const _limit = Math.max(1, Number(limit));
   const skip = (_page - 1) * _limit;

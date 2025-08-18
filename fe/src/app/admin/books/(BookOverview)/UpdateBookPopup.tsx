@@ -6,6 +6,7 @@ import { categoryQueries } from '@/lib/api/category';
 import { useQuery } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
 import { useUpdateBook } from '@/hooks/CRUD/useUpdateBook';
+import { Textarea } from '@/components/ui/textarea';
 
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -206,8 +207,7 @@ export default function UpdateBookPopup({
             />
             {errors.date && <p className="text-red-600 text-sm">{errors.date.message}</p>}
 
-            <input
-              type="text"
+            <Textarea
               {...register('description')}
               placeholder="Description"
               className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-black"

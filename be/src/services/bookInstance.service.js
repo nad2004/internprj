@@ -1,5 +1,6 @@
 import BookInstance from '../models/BookInstance.js';
 import mongoose from 'mongoose';
+const { ObjectId } = mongoose.Types;
 export const createBookInstance = async (data = {}) => {
   const payload = { ...data };
 
@@ -122,4 +123,17 @@ export const deleteBookInstance = async ({ id } = {}) => {
   ]);
 
   return updated.toObject();
+};
+export const getOneAvailableInstanceByBook = async (bookId, opts = {}) => {
+  if (!bookId) throw new Error('Cần bookId');
+  if (!ObjectId.isValid(bookId)) throw new Error('bookId không hợp lệ');
+  const oid = new ObjectId(bookId);
+  const cond = { book_id: oid, status: 'available' };
+  let q = BookInstance.findOne(cond).sort({ createdAt: 1 });
+  if (opts.select) q = q.select(opts.select);
+  if (opts.populate !== false) {
+    q = q.populate('book_id', 'title authors').populate('currentHolder', 'username email');
+  }
+  const doc = await q.lean();
+  return doc || null;
 };

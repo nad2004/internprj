@@ -14,7 +14,7 @@ const BookInstanceSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['available', 'borrowed', 'reserved', 'lost', 'damaged', 'unavailable'],
+    enum: ['available', 'borrowed', 'lost', 'damaged', 'unavailable'],
     default: 'available',
   },
   currentHolder: {

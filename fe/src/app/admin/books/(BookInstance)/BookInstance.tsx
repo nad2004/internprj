@@ -7,8 +7,8 @@ import type { User } from '@/types/User';
 import type { Book } from '@/types/Books';
 import type { BookInstance, BookInstanceInput } from '@/types/BookInstance';
 import { useQuery, keepPreviousData, useQueryClient } from '@tanstack/react-query';
-import { bookInstanceQueries } from '@/lib/api/bookInstance'; // <-- you provide
-import { addBookInstance } from '@/lib/api/bookInstance'; // <-- optional helper
+import { bookInstanceQueries } from '@/lib/api/bookInstance';
+import { addBookInstance } from '@/lib/api/bookInstance';
 import EditIcon from '@/icons/EditIcon.svg';
 import DeleteIcon from '@/icons/DeleteIcon.svg';
 import { Badge } from '@/components/ui/badge';

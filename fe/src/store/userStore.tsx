@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User } from '@/types/User';
 
-interface UserState {
+export interface UserState {
   profile: User | null;
   setUser: (user: User) => void;
   logout: () => void;

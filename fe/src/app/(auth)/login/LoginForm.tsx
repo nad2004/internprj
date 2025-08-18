@@ -1,16 +1,15 @@
 'use client';
+import GoogleLoginButton from './GoogleLoginButton';
 import axios from 'axios';
-
+import Link from 'next/link';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useLogin } from '../../../hooks/auth/useLogin';
-import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
-import FormOverlay from '@/components/FormOverlay';
-import Link from 'next/link';
-import GoogleLoginButton from './GoogleLoginButton';
-import { BookwormLogo } from '@/components/BookwormLogo';
+import Logo from '@/icons/Logo.svg';
 const schema = z.object({
   email: z.string().email('Email không hợp lệ'),
   password: z.string().min(6, 'Password is required'),
@@ -19,17 +18,19 @@ type LoginFormData = z.infer<typeof schema>;
 
 export default function LoginForm() {
   const router = useRouter();
-  const loading = useAuthStore((state) => state.loading);
+  const loading = useAuthStore((s) => s.loading);
   const { authStart, authSuccess, authFailure } = useAuthStore();
   const { login } = useLogin();
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({
+  } = useForm<LoginFormData>({
     resolver: zodResolver(schema),
     defaultValues: { email: '', password: '' },
   });
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const onSubmit = async (data: LoginFormData) => {
     authStart();
@@ -40,18 +41,15 @@ export default function LoginForm() {
       alert('Đăng nhập thành công');
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        // Đây là AxiosError: có thể đọc response
         const msg = error.response?.data?.error || error.message || 'Đăng nhập thất bại';
         console.error('Axios error:', msg, error.response?.data);
         authFailure();
         alert(msg);
       } else if (error instanceof Error) {
-        // Lỗi JS thông thường
         console.error('Error message:', error.message);
         authFailure();
         alert('Đăng nhập thất bại');
       } else {
-        // Bất kỳ thứ gì khác (string, number, object lạ)
         console.error('Unknown error:', error);
         authFailure();
         alert('Đăng nhập thất bại');
@@ -61,78 +59,91 @@ export default function LoginForm() {
 
   return (
     <>
-      <FormOverlay loading={loading} />
-      <main className="flex flex-col md:flex-row max-h-screen font-sans">
-        {/* Phần bên trái - Form Đăng Nhập */}
-        <div className="w-full max-w-1/2 bg-white flex flex-col justify-center items-center p-8 sm:p-12 order-2 md:order-1">
-          <div className="w-full ">
-            <div className="flex flex-col items-center text-center">
-              <BookwormLogo className="w-16 h-16 text-black mb-6" />
-              <h1 className="text-3xl font-bold mb-2">Welcome Back !!</h1>
-              <p className="text-gray-500 mb-8">Please enter your credentials to log in</p>
-            </div>
-
-            {/* Form */}
-            <form
-              onSubmit={handleSubmit(onSubmit)}
-              className={`space-y-4 ${loading ? 'opacity-50 pointer-events-none' : ''}`}
-            >
-              <div>
-                <input
-                  {...register('email')}
-                  placeholder="Email.."
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:border-black transition"
-                />
-                {errors.email && (
-                  <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
-                )}
-              </div>
-              <div>
-                <input
-                  type="password"
-                  {...register('password')}
-                  placeholder="Password"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:border-black transition"
-                />
-                {errors.password && (
-                  <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
-                )}
-              </div>
-
-              <Link href="#" className="text-sm text-black hover:underline block pt-1 pb-2">
-                Forgot password?
-              </Link>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3 rounded-full bg-black text-white font-semibold hover:bg-gray-800 transition text-base"
-              >
-                {loading ? 'Signing In...' : 'SIGN IN'}
-              </button>
-            </form>
-            <div className="mt-4 ">
-              <GoogleLoginButton />
-            </div>
-          </div>
+      <div className="rounded-2xl bg-white/95 p-6 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] sm:p-8">
+        {/* Logo / Title */}
+        <div className="mb-6 text-center">
+          <Logo
+            aria-hidden="true"
+            className="mx-auto h-auto w-28 sm:w-32" // <= thu nhỏ logo
+          />
+          <p className="mt-4 text-sm font-medium text-slate-700">Welcome Back !</p>
+          <p className="mt-1 text-xs text-slate-500">Sign in to continue to your digital Library</p>
         </div>
 
-        <div className="w-full md:w-1/2 bg-black text-white flex flex-col justify-center items-center p-12 text-center order-1 md:order-2 rounded-l-[60px]">
-          <div className="w-full max-w-sm ">
-            <BookwormLogo className="w-24 h-24 text-white mx-auto mb-4" />
-            <h2 className="text-5xl font-bold">BookWorm</h2>
-            <p className="text-lg tracking-[0.3em] font-light mt-1 mb-12">LIBRARY</p>
-            <p className="mb-6">New to our platform? Sign Up now.</p>
+        {/* Form */}
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className={`space-y-4 ${loading ? 'pointer-events-none opacity-50' : ''}`}
+        >
+          <div>
+            <label className="mb-1 block text-xs font-medium text-slate-600">Email</label>
+            <input
+              {...register('email')}
+              placeholder="username@bookworms.ac.th"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none ring-0 transition focus:border-[#ff6b57]"
+            />
+            {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>}
+          </div>
 
-            <Link
-              href="/register"
-              className="w-2/3 py-3 m-auto border flex items-center justify-center border-white rounded-full font-semibold hover:bg-white hover:text-black transition"
+          <div className="relative">
+            <label className="mb-1 block text-xs font-medium text-slate-600">Password</label>
+            <input
+              type={showPassword ? 'text' : 'password'}
+              {...register('password')}
+              placeholder="••••••••"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 pr-10 text-sm outline-none transition focus:border-[#ff6b57]"
+            />
+            <button
+              type="button"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              onClick={() => setShowPassword((v) => !v)}
+              className="absolute right-2 top-1/2 rounded px-2 py-1 text-xs text-slate-500 hover:text-slate-700"
             >
-              SIGN UP
+              {showPassword ? 'Hide' : 'Show'}
+            </button>
+            {errors.password && (
+              <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between pt-1">
+            <label className="inline-flex items-center gap-2 text-xs text-slate-600">
+              <input
+                type="checkbox"
+                className="h-3.5 w-3.5 rounded border-slate-300 text-[#ff6b57] focus:ring-0"
+              />
+              Remember me
+            </label>
+            <Link
+              href="#"
+              className="text-xs text-slate-600 underline-offset-2 hover:text-slate-800 hover:underline"
+            >
+              Forgot password?
             </Link>
           </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="mt-2 w-full rounded-md bg-[#ff6b57] py-2.5 text-sm font-semibold text-white transition hover:brightness-95 active:translate-y-[1px]"
+          >
+            Login
+          </button>
+          <GoogleLoginButton />
+        </form>
+
+        <div className="mt-5 space-y-1 text-center text-xs">
+          <p>
+            New User?{' '}
+            <Link
+              href="/register"
+              className="font-medium text-slate-700 underline-offset-2 hover:underline"
+            >
+              Register Here
+            </Link>
+          </p>
         </div>
-      </main>
+      </div>
     </>
   );
 }

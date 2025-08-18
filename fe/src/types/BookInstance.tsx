@@ -1,13 +1,6 @@
 import type { Book } from './Books';
 import type { User } from './User';
-export const BookInstanceStatus = [
-  'available',
-  'borrowed',
-  'reserved',
-  'lost',
-  'damaged',
-  'unavailable',
-];
+export const BookInstanceStatus = ['available', 'borrowed', 'lost', 'damaged', 'unavailable'];
 export interface BookInstance {
   _id?: string;
   book_id?: Book;

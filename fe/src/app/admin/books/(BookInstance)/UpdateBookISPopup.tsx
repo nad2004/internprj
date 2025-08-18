@@ -1,9 +1,11 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import BookIcon from '@/icons/BookIcon.svg';
 import type { Book } from '@/types/Books';
 import type { User } from '@/types/User';
 import type { BookInstance, BookInstanceInput } from '@/types/BookInstance';
+import { BookInstanceStatus } from '@/types/BookInstance';
+
 import { useQuery } from '@tanstack/react-query';
 import { booksQueries } from '@/lib/api/book';
 import { userQueries } from '@/lib/api/user';
@@ -19,13 +21,12 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useUpdateBookInstance } from '@/hooks/CRUD/useUpdateBookInstance'; // you implement
 import { useDebounce } from '@/hooks/useDebounce';
-const STATUSES = ['available', 'borrowed', 'reserved', 'lost', 'damaged', 'unavailable'] as const;
 
 const schema = z.object({
   _id: z.string(),
   book_id: z.string().trim().min(1, 'Book is required'),
   code: z.string().trim().min(1, 'Code is required').max(100),
-  status: z.enum(STATUSES),
+  status: z.enum(BookInstanceStatus),
   currentHolder: z.string().trim().optional().or(z.literal('')),
 });
 
@@ -82,7 +83,7 @@ export default function UpdateBookISPopup({ selected, onCancel, onUpdate }: Prop
         _id: selected._id || '',
         book_id: String((selected.book_id as Book)?._id || ''),
         code: selected.code || '',
-        status: (selected.status as (typeof STATUSES)[number]) || 'available',
+        status: (selected.status as (typeof BookInstanceStatus)[number]) || 'available',
         currentHolder: String((selected.currentHolder as User)?._id || ''),
       },
       { keepDirtyValues: false },
@@ -96,6 +97,7 @@ export default function UpdateBookISPopup({ selected, onCancel, onUpdate }: Prop
     await mutateAsync({ data: payload });
     onUpdate();
   }
+  const userNames = useMemo(() => users.map((r: User) => String(r.username)), [users]);
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -162,58 +164,77 @@ export default function UpdateBookISPopup({ selected, onCancel, onUpdate }: Prop
           <Controller
             control={control}
             name="status"
-            render={({ field }) => (
-              <>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-black">
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-60 overflow-y-auto bg-white rounded-md border shadow-md">
-                    {STATUSES.map((s) => (
-                      <SelectItem key={s} value={s} className="capitalize">
-                        {s}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.status && (
-                  <p className="text-red-600 text-sm mt-1">{errors.status.message}</p>
-                )}
-              </>
-            )}
+            render={({ field }) => {
+              const onTypeChange = (next: string) => {
+                const nextStr = String(next);
+                // LỌC: bỏ qua '' hoặc giá trị không nằm trong options (nhịp clear/invalid)
+                if (!BookInstanceStatus.includes(nextStr) || nextStr === '') return;
+                field.onChange(nextStr);
+              };
+              return (
+                <>
+                  <Select onValueChange={onTypeChange} value={field.value}>
+                    <SelectTrigger className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-black">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60 overflow-y-auto bg-white rounded-md border shadow-md">
+                      {BookInstanceStatus.map((s) => (
+                        <SelectItem key={s} value={s} className="capitalize">
+                          {s}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.status && (
+                    <p className="text-red-600 text-sm mt-1">{errors.status.message}</p>
+                  )}
+                </>
+              );
+            }}
           />
 
           <Controller
             control={control}
             name="currentHolder"
-            render={({ field }) => (
-              <>
-                {bookLoading ? (
-                  <div className="text-sm text-gray-500">Loading books…</div>
-                ) : bookError ? (
-                  <div className="text-red-600">Failed to load books</div>
-                ) : (
-                  <Select onValueChange={field.onChange} value={field.value || ''}>
-                    <SelectTrigger className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-black">
-                      <SelectValue placeholder="Assign holder (optional)" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-60 overflow-y-auto bg-white rounded-md border shadow-md">
-                      <SelectItem key={'noneUser'} value={'None'}>
-                        None
-                      </SelectItem>
+            render={({ field }) => {
+              const onUserChange = (next: string) => {
+                const nextStr = String(next);
+                // LỌC: bỏ qua '' hoặc giá trị không nằm trong options (nhịp clear/invalid)
+                if (!userNames.includes(nextStr) || nextStr === '') return;
+                field.onChange(nextStr);
+              };
+              return (
+                <>
+                  {userLoading ? (
+                    <div className="text-sm text-gray-500">Loading users…</div>
+                  ) : userError ? (
+                    <div className="text-red-600">Failed to load user</div>
+                  ) : (
+                    <Select onValueChange={field.onChange} value={field.value || ''}>
+                      <SelectTrigger className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-black">
+                        <SelectValue placeholder="Assign holder (optional)" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-60 overflow-y-auto bg-white rounded-md border shadow-md">
+                        <SelectItem key={'noneUser'} value={'None'}>
+                          None
+                        </SelectItem>
 
-                      {users?.map((u: User) => {
-                        return (
-                          <SelectItem key={String((u as User)._id)} value={String((u as User)._id)}>
-                            {u.username || u.email || (u as User)._id}
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                )}
-              </>
-            )}
+                        {users?.map((u: User) => {
+                          return (
+                            <SelectItem
+                              key={String((u as User)._id)}
+                              value={String((u as User)._id)}
+                            >
+                              {u.username || u.email || (u as User)._id}
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </>
+              );
+            }}
           />
 
           <div className="flex justify-end gap-4 mt-6">

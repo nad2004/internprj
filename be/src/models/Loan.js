@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 const loanSchema = new Schema({
   bookId: {
     type: Schema.Types.ObjectId,
-    ref: 'Book',
+    ref: 'BookInstance',
     required: true,
   },
   userId: {
@@ -25,7 +25,7 @@ const loanSchema = new Schema({
     type: Date,
     default: null,
   },
-  pickupScheduledAt: {
+  pickupAt: {
     type: Date,
     default: null,
   },
@@ -33,10 +33,14 @@ const loanSchema = new Schema({
     type: Date,
     default: null,
   },
+  description: {
+    type: String,
+    default: '',
+  },
   status: {
     type: String,
-    enum: ['borrowed', 'returned', 'overdue', 'cooldown'],
-    default: 'borrowed',
+    enum: ['reserve', 'borrowed', 'returned', 'overdue', 'cooldown'],
+    default: 'reserve',
   },
   pickupScheduledAt: {
     type: Date,

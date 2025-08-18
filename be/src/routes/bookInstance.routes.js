@@ -5,6 +5,7 @@ const router = express.Router();
 
 router.post('/', bookInstanceController.create);
 router.get('/', bookInstanceController.getAll);
+router.get('/available-instance', bookInstanceController.getAvailableByBook);
 router.get('/:id', bookInstanceController.getById);
 router.patch('/', bookInstanceController.update);
 router.patch('/delete', bookInstanceController.remove);

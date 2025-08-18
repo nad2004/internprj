@@ -74,7 +74,7 @@ export async function loginLocal({ email, password }) {
   await user.save();
   return {
     user: {
-      id: user._id,
+      _id: user._id,
       username: user.username,
       email: user.email,
       role: user.role,
@@ -124,7 +124,7 @@ export async function loginWithGoogle(profile) {
 
   return {
     user: {
-      id: user._id,
+      _id: user._id,
       username: user.username,
       email: user.email,
       role: user.role,

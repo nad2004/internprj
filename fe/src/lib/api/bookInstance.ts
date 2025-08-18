@@ -10,6 +10,16 @@ export async function fetchBooksInstance(params?: Record<string, string | number
   });
   return res.data.data;
 }
+export async function fetchBooksInstanceAvailable(bookId?: string) {
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/book-instance/available-instance`,
+    {
+      params: { bookId },
+      withCredentials: true,
+    },
+  );
+  return res.data.data;
+}
 export async function updateBookInstance(data: BookInstanceInput) {
   const res = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/book-instance`, data, {
     withCredentials: true,
@@ -35,7 +45,6 @@ export async function addBookInstance(payload: BookInstanceInput) {
     console.error('Lỗi khi thêm sách:', err);
   }
 }
-// --- Keys phụ cho Google Books (tạo tại chỗ bằng keyFactory, KHÔNG cần sửa queryKeys.ts) ---
 const bookInstanceKey = keyFactory('bookInstance');
 
 // --- QueryOptions Factories ---
@@ -47,5 +56,12 @@ export const bookInstanceQueries = {
       staleTime: 60_000,
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
+    }),
+  availableDetail: (bookId: string) =>
+    queryOptions({
+      queryKey: bookInstanceKey.availableDetail(bookId),
+      queryFn: () => fetchBooksInstanceAvailable(bookId),
+      staleTime: 60_000,
+      refetchOnWindowFocus: false,
     }),
 };

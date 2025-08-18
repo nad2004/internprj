@@ -1,5 +1,6 @@
 import * as bookService from '../services/book.service.js';
 import { respondSuccess } from '../utils/respond.js';
+import mongoose from 'mongoose';
 const toObjectId = (id) => {
   if (!mongoose.Types.ObjectId.isValid(id)) return null;
   return new mongoose.Types.ObjectId(id);
@@ -22,7 +23,6 @@ export const getBooks = async (req, res) => {
       limit = '20',
       sort = '-createdAt',
     } = req.query;
-
     const filter = {};
 
     // category: ObjectId[]
@@ -105,7 +105,6 @@ export const getBookTrending = async (req, res) => {
 export const createSimpleController = async (req, res, next) => {
   try {
     const { name, author, date, type, description, imageLinks } = req.body;
-    console.log(imageLinks);
     const book = await bookService.createBookSimple({
       title: name,
       author,

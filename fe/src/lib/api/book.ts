@@ -11,6 +11,15 @@ export async function fetchBooks(params?: Record<string, string | number>) {
   return res.data.data;
 }
 
+export async function fetchBookDetail(slug: string) {
+  if (!slug) throw new Error('Missing slug');
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/book/${encodeURIComponent(slug)}`,
+    { withCredentials: true },
+  );
+  return res.data.data; // { ...book, stats }
+}
+
 export async function fetchBookTrending() {
   const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/book/trending`, {
     withCredentials: true,
@@ -80,5 +89,13 @@ export const booksQueries = {
       queryFn: () => fetchGoogleBook(q),
       enabled: q.length > 2,
       staleTime: 5 * 60_000,
+    }),
+
+  detail: (slug: string) =>
+    queryOptions({
+      queryKey: booksKeys.detail(slug),
+      queryFn: () => fetchBookDetail(slug),
+      staleTime: 60_000,
+      refetchOnWindowFocus: false,
     }),
 };

@@ -6,8 +6,6 @@ export interface Category {
   _id: string;
   name: string;
   slug: string;
-  createdAt: string;
-  createdBy: string;
 }
 export interface GoogleItem {
   id: string;

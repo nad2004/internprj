@@ -3,7 +3,7 @@
 import StatCard from '@/app/admin/dashboard/StatCard';
 import DashboardUserCard from './DashBoardUserCard';
 
-import BookWormIcon from '@/icons/BookWormIcons.svg';
+import Logo from '@/icons/Logo.svg';
 import OverDueUserIcon from '@/icons/OverDueUserIcon.svg';
 import BranchIcon from '@/icons/BranchIcon.svg';
 import UserIcon from '@/icons/UserIcon.svg';
@@ -42,7 +42,7 @@ export default function Dashboard() {
             <div className="w-3/4  aspect-square bg-gradient-to-tr from-gray-900 to-gray-700 rounded-full relative"></div>
             <div className="flex flex-row gap-4 bg-gray-100 p-4 rounded-lg shadow-sm w-fit">
               <div className="flex items-center justify-center">
-                <BookWormIcon />
+                <Logo />
               </div>
               <div className="w-px bg-gray-300 mx-2" />
 

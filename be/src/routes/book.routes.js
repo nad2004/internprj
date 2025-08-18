@@ -4,7 +4,7 @@ import * as bookController from '../controllers/book.controller.js';
 const router = express.Router();
 
 router.get('/', bookController.getBooks);
-router.get('/:slug/detail', bookController.getBookDetailWithStatsBySlug);
+router.get('/:slug', bookController.getBookDetailWithStatsBySlug);
 router.get('/trending', bookController.getBookTrending);
 router.post('/create-one', bookController.createSimpleController);
 router.patch('/', bookController.updateSimpleController);

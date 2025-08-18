@@ -98,3 +98,17 @@ export const remove = async (req, res, next) => {
     next(e);
   }
 };
+export const getAvailableByBook = async (req, res, next) => {
+  try {
+    const { bookId } = req.query;
+
+    const inst = await bookInstanceService.getOneAvailableInstanceByBook(bookId);
+    if (!inst) {
+      return res.status(404).json({ success: false, message: 'No available copy' });
+    }
+
+    return respondSuccess(res, { data: inst });
+  } catch (err) {
+    next(err);
+  }
+};

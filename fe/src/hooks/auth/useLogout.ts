@@ -5,6 +5,7 @@ import axios from 'axios';
 export default function useLogout(userId: string) {
   const router = useRouter();
   const logout = useUserStore((state) => state.logout);
+
   return async function handleLogout() {
     try {
       await axios.post(

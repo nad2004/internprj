@@ -7,7 +7,8 @@ router.get('/:id', loanController.getLoanById);
 router.post('/', loanController.createLoan);
 router.put('/:id', loanController.updateLoan);
 router.delete('/:id', loanController.deleteLoan);
-router.post('/:id/return', loanController.returnBook);
+router.post('/loans/:id/next', loanController.nextAction);
+router.post('/:id/return', loanController.markAsReturned);
 router.post('/:id/confirm', loanController.confirmLoan);
 router.post('/:id/start-cooldown', loanController.startCooldown);
 

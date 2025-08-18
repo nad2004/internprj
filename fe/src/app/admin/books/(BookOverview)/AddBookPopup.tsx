@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
@@ -206,8 +207,7 @@ export default function AddBookPopup({ onCancel, onAdd }: AddBookPopupProps) {
           />
           {errors.date && <p className="text-red-600 text-sm">{errors.date.message}</p>}
 
-          <input
-            type="text"
+          <Textarea
             {...register('description')}
             placeholder="Description"
             className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-black"
