@@ -13,8 +13,8 @@ import ChangePasswordDialog from '@/components/ChangePasswordDialog';
 import { useAuthStore } from '@/store/authStore';
 import FormOverlay from '@/components/FormOverlay';
 
-const UPLOAD_URL = 'http://localhost:8080/api/upload/image';       // POST field 'file'
-const UPDATE_ME   = () => `http://localhost:8080/api/user`;         // PATCH {_id, ...}
+const UPLOAD_URL = 'http://localhost:8080/api/upload/image'; // POST field 'file'
+const UPDATE_ME = () => `http://localhost:8080/api/user`; // PATCH {_id, ...}
 
 export default function AccountSettings() {
   const profile = useUserStore((s: UserState) => s.profile);
@@ -182,7 +182,12 @@ export default function AccountSettings() {
 
         <div className="md:col-span-2">
           <Label className="mb-1 block text-slate-600">Bio</Label>
-          <Textarea placeholder="I'm a student" readOnly disabled className="min-h-[120px] resize-none" />
+          <Textarea
+            placeholder="I'm a student"
+            readOnly
+            disabled
+            className="min-h-[120px] resize-none"
+          />
         </div>
       </div>
 

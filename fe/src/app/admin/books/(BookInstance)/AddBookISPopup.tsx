@@ -47,6 +47,10 @@ export default function AddBookISPopup({ onCancel, onAdd }: Props) {
   } = useQuery({
     ...booksQueries.list({
       search: debouncedQuery.trim() || '',
+      limit: 100,
+      offset: 0,
+      sort: 'title',
+      order: 'asc',
     }),
   });
   const books: Book[] = bookList?.items ?? [];
@@ -75,7 +79,7 @@ export default function AddBookISPopup({ onCancel, onAdd }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg max-w-3/4 p-6 relative w-[720px]">
+      <div className="bg-white rounded-lg shadow-lg w-3/4 p-6 relative">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -187,16 +191,15 @@ export default function AddBookISPopup({ onCancel, onAdd }: Props) {
                       </SelectItem>
 
                       {users?.map((u: User) => {
-                        console.log(u);
                         return (
-                          <>
+                          <div key={String((u as User)._id)}>
                             <SelectItem
                               key={String((u as User)._id)}
                               value={String((u as User)._id)}
                             >
                               {u.username || u.email || (u as User)._id}
                             </SelectItem>
-                          </>
+                          </div>
                         );
                       })}
                     </SelectContent>

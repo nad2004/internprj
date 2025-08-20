@@ -131,3 +131,7 @@
 .digital {
   font-family: 'DigitalNumbers', ui-monospace, SFMono-Regular, Menlo, monospace;
 }
+@keyframes notice-slide-right-in {
+  from { transform: translateX(120%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}

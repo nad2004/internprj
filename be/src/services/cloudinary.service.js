@@ -1,6 +1,7 @@
 // services/cloudinary.service.js
 import cloudinary from '../config/cloudinary.js';
 import streamifier from 'streamifier';
+import crypto from 'crypto';
 
 const pick = (r) => ({
   public_id: r.public_id,
@@ -13,16 +14,8 @@ const pick = (r) => ({
   version: r.version,
 });
 
-/* ===== Upload bình thường (giữ nguyên để dùng khi cần) ===== */
-export function uploadBufferToCloudinary(
-  buffer,
-  {
-    folder = 'library/uploads',
-    publicId,
-    overwrite = false,
-    transform, // ví dụ: { width: 800, height: 800, crop: 'limit' }
-  } = {},
-) {
+/* -------------------- helpers core -------------------- */
+function uploadBuffer(buffer, { folder, publicId, overwrite = false, transform } = {}) {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
@@ -30,73 +23,97 @@ export function uploadBufferToCloudinary(
         folder,
         public_id: publicId,
         overwrite,
+        unique_filename: false, // dùng đúng public_id truyền vào
         transformation: transform,
       },
-      (err, res) => (err ? reject(err) : resolve(pick(res))),
+      (err, res) => (err ? reject(err) : resolve(pick(res)))
     );
     streamifier.createReadStream(buffer).pipe(stream);
   });
 }
 
-export async function uploadBase64ToCloudinary(dataUri, opts = {}) {
-  const r = await cloudinary.uploader.upload(dataUri, {
-    resource_type: 'image',
-    folder: opts.folder || 'library/uploads',
-    public_id: opts.publicId,
-    overwrite: opts.overwrite || false,
-    transformation: opts.transform,
-  });
-  return pick(r);
+async function findImageByPublicId(publicId) {
+  try {
+    const r = await cloudinary.api.resource(publicId, { resource_type: 'image' });
+    return pick(r);
+  } catch (e) {
+    // Cloudinary SDK có nhiều dạng error khác nhau:
+    const code =
+      e?.http_code ??
+      e?.status ??
+      e?.response?.status ??
+      e?.error?.http_code;
+
+    const msg = (e?.message || e?.error?.message || '').toLowerCase();
+
+    // 404 -> coi như "chưa có", trả null để tiếp tục upload
+    if (code === 404 || msg.includes('not found')) {
+      return null;
+    }
+
+    // các lỗi khác mới ném ra
+    throw e;
+  }
 }
 
-export async function uploadUrlToCloudinary(url, opts = {}) {
-  const r = await cloudinary.uploader.upload(url, {
-    resource_type: 'image',
-    folder: opts.folder || 'library/uploads',
-    public_id: opts.publicId,
-    overwrite: opts.overwrite || false,
-    transformation: opts.transform,
-  });
-  return pick(r);
+function dataUriToBuffer(dataUri) {
+  const m = String(dataUri).match(/^data:(.+?);base64,(.+)$/);
+  if (!m) throw new Error('Invalid base64 data URI');
+  return Buffer.from(m[2], 'base64');
 }
 
-/* ===== Overwrite: ghi đè đúng public_id, invalidate CDN ===== */
-export function overwriteFromBuffer(
+/* -------------------- CÁCH 1: DEDUPE THEO NỘI DUNG -------------------- */
+// File/buffer
+export async function uploadOrReuseByHashFromBuffer(
   buffer,
-  { publicId, folder, transform } = {},
+  { folder = 'library/uploads', transform } = {}
 ) {
   if (!buffer) throw new Error('Missing file buffer');
-  if (!publicId) throw new Error('Missing publicId');
 
-  return new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      {
-        resource_type: 'image',
-        folder,
-        public_id: publicId,
-        overwrite: true,
-        invalidate: true,       // xóa cache CDN
-        unique_filename: false, // giữ nguyên public_id
-        transformation: transform,
-      },
-      (err, res) => (err ? reject(err) : resolve(pick(res))),
-    );
-    streamifier.createReadStream(buffer).pipe(stream);
+  const hash = crypto.createHash('sha1').update(buffer).digest('hex');
+  const publicId = folder ? `${folder}/${hash}` : hash;
+
+  let existed = null;
+  try {
+    existed = await findImageByPublicId(publicId);
+  } catch (err) {
+    // log để debug nếu có lỗi lạ (401/403/5xx)
+    console.error('[CLD resource check error]', {
+      code: err?.http_code || err?.status || err?.error?.http_code,
+      msg: err?.message || err?.error?.message,
+    });
+    throw err; // chỉ throw khi không phải 404
+  }
+
+  if (existed) return { ...existed, existed: true };
+
+  // upload mới
+  const r = await uploadBuffer(buffer, { folder, publicId, overwrite: false, transform });
+  return { ...r, existed: false };
+}
+
+// Base64
+export async function uploadOrReuseByHashFromBase64(dataUri, opts = {}) {
+  const buffer = dataUriToBuffer(dataUri);
+  return uploadOrReuseByHashFromBuffer(buffer, opts);
+}
+
+/* -------------------- Overwrite (giữ cho endpoint riêng khi cần) -------------------- */
+export function overwriteFromBuffer(buffer, { publicId, folder, transform } = {}) {
+  if (!buffer) throw new Error('Missing file buffer');
+  if (!publicId) throw new Error('Missing publicId');
+  return uploadBuffer(buffer, {
+    folder,
+    publicId,
+    overwrite: true,
+    transform,
   });
 }
 
 export async function overwriteFromBase64(dataUri, opts = {}) {
   if (!opts?.publicId) throw new Error('Missing publicId');
-  const r = await cloudinary.uploader.upload(dataUri, {
-    resource_type: 'image',
-    folder: opts.folder,
-    public_id: opts.publicId,
-    overwrite: true,
-    invalidate: true,
-    unique_filename: false,
-    transformation: opts.transform,
-  });
-  return pick(r);
+  const buffer = dataUriToBuffer(dataUri);
+  return overwriteFromBuffer(buffer, opts);
 }
 
 export async function overwriteFromUrl(url, opts = {}) {
@@ -106,14 +123,13 @@ export async function overwriteFromUrl(url, opts = {}) {
     folder: opts.folder,
     public_id: opts.publicId,
     overwrite: true,
-    invalidate: true,
     unique_filename: false,
     transformation: opts.transform,
   });
   return pick(r);
 }
 
-/* ===== Delete asset ===== */
+/* -------------------- Delete asset -------------------- */
 export async function deleteCloudinaryImage(publicId) {
   return cloudinary.uploader.destroy(publicId, { resource_type: 'image' });
 }

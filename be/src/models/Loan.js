@@ -37,10 +37,14 @@ const loanSchema = new Schema({
     type: String,
     default: '',
   },
+  rejectReason: {
+    type: String,
+    default: '',
+  },
   status: {
     type: String,
-    enum: ['reserve', 'borrowed', 'returned', 'overdue', 'cooldown'],
-    default: 'reserve',
+    enum: ['pending', 'reserve', 'borrowed', 'returned', 'overdue', 'cooldown', 'rejected'],
+    default: 'pending',
   },
   pickupScheduledAt: {
     type: Date,

@@ -10,6 +10,7 @@ import authRoutes from './routes/auth.routes.js';
 import googleRoutes from './routes/google.routes.js';
 import loanRoutes from './routes/loan.routes.js';
 import uploadRoutes from './routes/upload.routes.js';
+import notificationRoutes from './routes/notification.routes.js';
 import bookInstanceRoutes from './routes/bookInstance.routes.js';
 import cookieParser from 'cookie-parser';
 import errorHandler from './middleware/errorHandler.js';
@@ -34,7 +35,7 @@ app.use('/api/book-instance', bookInstanceRoutes);
 app.use('/api/google', googleRoutes);
 app.use('/api/loan', loanRoutes);
 app.use('/api/upload', uploadRoutes);
-
+app.use('/api/notify', notificationRoutes);
 const PORT = process.env.PORT;
 
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

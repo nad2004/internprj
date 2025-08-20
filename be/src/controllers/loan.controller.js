@@ -68,8 +68,10 @@ export const createLoan = async (req, res, next) => {
 
 /** GET /loans */
 export const getAllLoans = async (req, res, next) => {
+  
   try {
-    const loans = await loanService.getAllLoans();
+    const filter = req.query;
+    const loans = await loanService.getAllLoans(filter);
     respondSuccess(res, { data: loans });
   } catch (err) {
     next(err);
@@ -111,7 +113,7 @@ export const deleteLoan = async (req, res, next) => {
 /** POST /loans/:id/return */
 export const nextAction = async (req, res, next) => {
   try {
-    const loan = await loanService.nextStep(req.params.id, {
+    const loan = await loanService.nextStep(req.body.id, {
       cooldownUntil: req.body?.cooldownUntil, // optional
     });
     respondSuccess(res, { data: loan });
@@ -124,7 +126,7 @@ export const nextAction = async (req, res, next) => {
 export const markAsReturned = async (req, res, next) => {
   try {
     const loan = await loanService.markReturned(
-      req.params.id,
+      req.body.id,
       req.body?.returnedAt ? new Date(req.body.returnedAt) : new Date(),
     );
     respondSuccess(res, { data: loan });
@@ -132,11 +134,12 @@ export const markAsReturned = async (req, res, next) => {
     next(err);
   }
 };
-
-/** POST /loans/:id/confirm */
-export const confirmLoan = async (req, res, next) => {
+export const rejectLoan = async (req, res, next) => {
   try {
-    const loan = await loanService.confirmLoan(req.params.id);
+    const loan = await loanService.rejectLoan(
+      req.body.payload.id,
+      req.body.payload.reason,
+    );
     respondSuccess(res, { data: loan });
   } catch (err) {
     next(err);

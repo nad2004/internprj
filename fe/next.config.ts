@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
     domains: [
       'ui-avatars.com',
       'books.google.com',
+      'res.cloudinary.com',
       'lh3.googleusercontent.com',
       'neelkanthpublishers.com',
     ],

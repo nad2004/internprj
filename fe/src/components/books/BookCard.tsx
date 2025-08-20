@@ -14,30 +14,30 @@ export default function BookCard({ book }: { book: Book }) {
   const count = typeof book.ratingsCount === 'number' ? book.ratingsCount : undefined;
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-2 shadow-sm" >
+    <div className="rounded-xl border border-slate-200 bg-white p-2 shadow-sm">
       <Link href={`/search/${book.slug}`}>
-      <div className="relative overflow-hidden rounded-lg" style={{ aspectRatio: '3 / 4' }}>
-        <Image
-          src={coverSrc}
-          alt={book.title}
-          fill
-          className="object-cover"
-          sizes="(max-width: 640px) 45vw, 200px"
-        />
-      </div>
+        <div className="relative overflow-hidden rounded-lg" style={{ aspectRatio: '3 / 4' }}>
+          <Image
+            src={coverSrc}
+            alt={book.title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 45vw, 200px"
+          />
+        </div>
 
-      <div className="mt-2 space-y-1">
-        <p className="truncate text-sm font-medium" title={book.title}>
-          {book.title}
-        </p>
+        <div className="mt-2 space-y-1">
+          <p className="truncate text-sm font-medium" title={book.title}>
+            {book.title}
+          </p>
 
-        <p className="truncate text-xs text-slate-500" title={authorLabel}>
-          {authorLabel}
-          {yearLabel ? `, ${yearLabel}` : ''}
-        </p>
+          <p className="truncate text-xs text-slate-500" title={authorLabel}>
+            {authorLabel}
+            {yearLabel ? `, ${yearLabel}` : ''}
+          </p>
 
-        {/* Hiển thị rating trung bình (nếu có) + số lượt đánh giá */}
-        {/* {avg !== undefined && (
+          {/* Hiển thị rating trung bình (nếu có) + số lượt đánh giá */}
+          {/* {avg !== undefined && (
           <div className="flex items-center gap-1 text-xs text-slate-600">
             <span className="text-amber-500">★</span>
             {avg.toFixed(1)}
@@ -45,11 +45,10 @@ export default function BookCard({ book }: { book: Book }) {
           </div>
         )} */}
 
-        {/* Tuỳ chọn: hiện category dòng nhỏ */}
-        {categoryLabel && <p className="truncate text-[10px] text-slate-400">{categoryLabel}</p>}
-      </div>
+          {/* Tuỳ chọn: hiện category dòng nhỏ */}
+          {categoryLabel && <p className="truncate text-[10px] text-slate-400">{categoryLabel}</p>}
+        </div>
       </Link>
-      
     </div>
   );
 }

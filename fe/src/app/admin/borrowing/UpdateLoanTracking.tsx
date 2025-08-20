@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import axios from 'axios';
-import { useMutation } from '@tanstack/react-query';
-
+import { useLoanNextMutation } from '@/hooks/CRUD/useLoanNextMutation';
+import { useReturnLoanMutation } from '@/hooks/CRUD/useReturnLoanMutation';
+import { useRejectLoanMutation } from '@/hooks/CRUD/useRejectLoanMutation';
 // shadcn/ui
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -18,21 +18,18 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Textarea } from '@/components/ui/textarea';
 // icons (lucide-react)
 import { Clock, ClipboardList, CheckCircle2, History, AlertTriangle } from 'lucide-react';
+import { ConfirmPopup } from '../../admin/borrowing/ConfirmPopup';
 
 // Types
 import type { Loan, LoanStatus } from '@/types/Borrow';
 
 export type UpdateLoanTrackingProps = {
-  /** Dữ liệu loan truyền từ page (giống selectedUser trong UpdateUserPopup) */
   selectedLoan: Loan | null;
-  /** Nếu truyền, component sẽ hiển thị trong Dialog của shadcn (giống popup) */
   open?: boolean;
-  /** Đóng popup */
   onCancel: () => void;
-  /** Gọi sau khi cập nhật trạng thái thành công, trả về loan mới từ server */
-  onUpdate: (updated: Loan) => void;
 };
 
 const API = process.env.NEXT_PUBLIC_API_URL || '';
@@ -62,6 +59,8 @@ function isOverdue(loan?: Loan | null) {
 
 function nextStatus(current: LoanStatus): LoanStatus | null {
   switch (current) {
+    case 'pending':
+      return 'reserve';
     case 'reserve':
       return 'borrowed';
     case 'borrowed':
@@ -77,24 +76,16 @@ export default function UpdateLoanTracking({
   selectedLoan,
   open,
   onCancel,
-  onUpdate,
 }: UpdateLoanTrackingProps) {
   const loan = selectedLoan;
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [returnOpen, setReturnOpen] = useState(false);
+  const [rejectOpen, setRejectOpen] = useState(false);
+  const [reason, setReason] = useState('');
   const [pendingStatus, setPendingStatus] = useState<LoanStatus | null>(null);
-
-  const updateMutation = useMutation({
-    mutationFn: async (status: LoanStatus) => {
-      if (!loan?._id) throw new Error('Missing loan id');
-      const { data } = await axios.put(`${API}/loan/${loan._id}/status`, { status });
-      return data as Loan;
-    },
-    onSuccess: (updated) => {
-      setConfirmOpen(false);
-      setPendingStatus(null);
-      onUpdate(updated);
-    },
-  });
+  const { mutateAsync: nextActionLoan, isPending, error, isSuccess } = useLoanNextMutation();
+  const { mutateAsync: returnLoan, isPending: returnPending } = useReturnLoanMutation();
+  const { mutateAsync: rejectLoan, isPending: rejectPending } = useRejectLoanMutation();
 
   const overdue = useMemo(() => isOverdue(loan), [loan]);
 
@@ -109,13 +100,26 @@ export default function UpdateLoanTracking({
   const handleMarkReturned = () => {
     if (!loan) return;
     setPendingStatus('returned');
-    setConfirmOpen(true);
+    setReturnOpen(true);
   };
-
-  const handleConfirm = () => {
-    if (pendingStatus) updateMutation.mutate(pendingStatus);
+  const handleRejectClick = () => {
+    setRejectOpen(true);
   };
-
+  async function handleConfirm() {
+    await nextActionLoan(loan?._id || '');
+    setConfirmOpen(false);
+    onCancel();
+  }
+  async function handleReject() {
+    await rejectLoan({ id: loan?._id || "", reason });
+    setRejectOpen(false);
+    onCancel();
+  }
+  async function handleReturn() {
+    await returnLoan(loan?._id || "")
+    setReturnOpen(false);
+    onCancel();
+  }
   if (!loan) {
     return (
       <Alert className="m-6" variant="destructive">
@@ -129,26 +133,43 @@ export default function UpdateLoanTracking({
   }
 
   const Content = (
-    <div className="w-full mx-auto p-6 space-y-4 ">
+    <div className="w-full mx-auto p-6 space-y-4 abosolute top-0 left-0 right-0 bottom-0 overflow-y-auto">
       {/* Header */}
-
+      {error && <div className="p-6 text-2xl text-red-700">{error.message}</div>}
       {/* Status badges */}
       <div className="flex flex-wrap items-center gap-2">
-        <Badge variant={loan.status === 'reserve' ? 'default' : 'outline'} className="gap-1">
+        <Badge
+          variant={!overdue && loan.status === 'reserve' ? 'default' : 'outline'}
+          className="gap-1"
+        >
           <Clock className="h-4 w-4" /> Reserve
         </Badge>
-        <Badge variant={loan.status === 'borrowed' ? 'default' : 'outline'} className="gap-1">
+        <Badge
+          variant={!overdue && loan.status === 'borrowed' ? 'default' : 'outline'}
+          className="gap-1"
+        >
           <ClipboardList className="h-4 w-4" /> Borrowed
-        </Badge>
-        <Badge variant={loan.status === 'returned' ? 'default' : 'outline'} className="gap-1">
-          <CheckCircle2 className="h-4 w-4" /> Returned
-        </Badge>
-        <Badge variant={loan.status === 'cooldown' ? 'default' : 'outline'} className="gap-1">
-          <History className="h-4 w-4" /> Cooldown
         </Badge>
         {overdue && (
           <Badge variant="destructive" className="gap-1">
             <AlertTriangle className="h-4 w-4" /> Overdue
+          </Badge>
+        )}
+        <Badge
+          variant={!overdue && loan.status === 'returned' ? 'default' : 'outline'}
+          className="gap-1"
+        >
+          <CheckCircle2 className="h-4 w-4" /> Returned
+        </Badge>
+        <Badge
+          variant={!overdue && loan.status === 'cooldown' ? 'default' : 'outline'}
+          className="gap-1"
+        >
+          <History className="h-4 w-4" /> Cooldown
+        </Badge>
+        {loan.status === 'rejected' && (
+          <Badge variant="destructive" className="gap-1">
+            <AlertTriangle className="h-4 w-4" /> Rejected
           </Badge>
         )}
       </div>
@@ -163,7 +184,8 @@ export default function UpdateLoanTracking({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2 text-sm">
               <div>
-                Mã: <span className="font-medium">{(loan as Loan)?._id || '—'}</span>
+                Mã:{' '}
+                <span className="font-medium">{(loan as Loan)?.bookId?.book_id?.slug || '—'}</span>
               </div>
               <div>Borrowed at: {formatDate(loan.borrowedAt)}</div>
               <div>Due at: {formatDate(loan.dueAt)}</div>
@@ -189,7 +211,9 @@ export default function UpdateLoanTracking({
             <CardTitle className="text-base">Ghi chú</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm leading-relaxed">{loan.description}</p>
+            <p className="text-sm leading-relaxed break-all [overflow-wrap:anywhere]">
+            {loan.description}
+          </p>
           </CardContent>
         </Card>
       )}
@@ -203,7 +227,7 @@ export default function UpdateLoanTracking({
           <div className="flex flex-col sm:flex-row gap-3">
             <Button
               onClick={handleNextClick}
-              disabled={loan.status === 'cooldown' || updateMutation.isPending}
+              disabled={loan.status === 'cooldown' || isPending}
               className="w-full sm:w-auto"
             >
               {loan.status === 'cooldown' ? 'No further steps' : 'Next Step'}
@@ -211,10 +235,18 @@ export default function UpdateLoanTracking({
             <Button
               variant="outline"
               onClick={handleMarkReturned}
-              disabled={loan.status !== 'borrowed' || updateMutation.isPending}
+              disabled={(loan.status !== 'borrowed' && loan.status !== 'overdue') || isPending}
               className="w-full sm:w-auto"
             >
               Mark as Returned
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleRejectClick}
+              disabled={loan.status !== 'pending' || isPending}
+              className="w-full sm:w-auto"
+            >
+              Reject
             </Button>
           </div>
           <Separator className="my-4" />
@@ -222,36 +254,45 @@ export default function UpdateLoanTracking({
             <span>
               Status: <span className="font-medium text-foreground">{loan.status}</span>
             </span>
-            {updateMutation.isPending && <span>Updating…</span>}
+            {isPending && <span>Updating…</span>}
           </div>
         </CardContent>
       </Card>
-
-      {/* Confirm dialog */}
-      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+      <Dialog open={rejectOpen} onOpenChange={setRejectOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Xác nhận đổi trạng thái</DialogTitle>
-            <DialogDescription>
-              {pendingStatus ? (
-                <>
-                  Chuyển trạng thái sang <span className="font-medium">{pendingStatus}</span>?
-                </>
-              ) : (
-                <>Chưa chọn thay đổi.</>
-              )}
-            </DialogDescription>
+            <DialogTitle>Xác nhận từ chối</DialogTitle>
+            <DialogDescription>Lý Do:</DialogDescription>
+            <Textarea value={reason} onChange={({ target }) => setReason(target.value)} />
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmOpen(false)}>
+            <Button variant="outline" onClick={() => setRejectOpen(false)}>
               Huỷ
             </Button>
-            <Button onClick={handleConfirm} disabled={!pendingStatus || updateMutation.isPending}>
+            <Button onClick={handleReject} disabled={ rejectPending}>
               Đồng ý
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <ConfirmPopup
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title="Xác nhận đổi trạng thái"
+        description= {pendingStatus ? pendingStatus : "Chưa chọn thay đổi."}
+        confirmText="Xác nhận"
+        cancelText="Huỷ"
+        onConfirm={() => handleConfirm()}
+      />
+      <ConfirmPopup
+        open={returnOpen}
+        onOpenChange={setReturnOpen}
+        title="Trả sách?"
+        description="Hành động này sẽ đánh dấu phiếu mượn là đã trả."
+        confirmText="Xác nhận"
+        cancelText="Huỷ"
+        onConfirm={() => handleReturn()}
+      />
     </div>
   );
 
@@ -264,7 +305,7 @@ export default function UpdateLoanTracking({
           if (!v) onCancel();
         }}
       >
-        <DialogContent className="max-w-3xl p-0 border-none shadow-none bg-slate-300 ">
+        <DialogContent className="fixed max-w-3xl p-0 border-none shadow-none bg-slate-300 ">
           <DialogTitle className="text-center text-[16px] font-semibold mt-3">
             Theo dõi và cập nhật trạng thái mượn sách
           </DialogTitle>

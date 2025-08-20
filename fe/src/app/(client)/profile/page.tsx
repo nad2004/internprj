@@ -17,11 +17,17 @@ export default function ProfilePage() {
             Account Setting
           </TabsTrigger>
 
-          <TabsTrigger value="borrow" className="rounded-full px-4 py-2 data-[state=active]:bg-[#ffedea] data-[state=active]:text-[#F76B56]">
+          <TabsTrigger
+            value="borrow"
+            className="rounded-full px-4 py-2 data-[state=active]:bg-[#ffedea] data-[state=active]:text-[#F76B56]"
+          >
             Borrow History
           </TabsTrigger>
 
-          <TabsTrigger value="notifications" className="rounded-full px-4 py-2 data-[state=active]:bg-[#ffedea] data-[state=active]:text-[#F76B56]">
+          <TabsTrigger
+            value="notifications"
+            className="rounded-full px-4 py-2 data-[state=active]:bg-[#ffedea] data-[state=active]:text-[#F76B56]"
+          >
             Notifications
           </TabsTrigger>
         </TabsList>

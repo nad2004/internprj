@@ -3,9 +3,21 @@ import Vector1 from '@/icons/Vector1.svg';
 import Vector2 from '@/icons/Vector2.svg';
 import ClientSideBar from './ClientSideBar';
 import Header from './Header';
+import OneShotNotice from "./OneShotNotice";
+import { notificationQueries} from '@/lib/api/notifications';
+import { useQuery } from '@tanstack/react-query';
+import { useUserStore, UserState } from '@/store/userStore';
 export default function HomeLayout({ children }: { children: React.ReactNode }) {
+  const profile = useUserStore((u) => (u as UserState).profile);
+  const userId = profile?._id ?? '';
+  const { data } = useQuery({ ...notificationQueries.list({ userId }) });
   return (
     <div className="relative h-screen isolate bg-[#f6f6f7] text-slate-800 overflow-hidden">
+       {data && data.total > 0 && (
+        <OneShotNotice duration={1000}>
+          You have {data.total} new notifications.
+        </OneShotNotice>
+      )}
       {/* Background */}
       <div aria-hidden="true" className="absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute h-full" />

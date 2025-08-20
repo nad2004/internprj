@@ -39,7 +39,7 @@ function GenericTable<T>({ data, columns, onEdit, onDelete, onView, className }:
           {data.map((item, idx) => (
             <tr key={idx} className={`  hover:bg-gray-50 cursor-pointer`}>
               {columns.map((col) => (
-                <td key={col.key.toString()} className="py-4 px-6 font-medium">
+                <td key={col.key.toString()} className="py-4 px-6 font-medium truncate">
                   {col.render ? col.render(item) : (item as any)[col.key]}
                 </td>
               ))}

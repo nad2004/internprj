@@ -227,7 +227,7 @@ export default function BorrowDialog({
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
               placeholder="Purpose"
-              className="min-h-[96px] resize-none rounded-lg border-slate-200 bg-white"
+              className="w-full max-w-full min-h-[96px] resize-none rounded-lg border-slate-200 bg-white"
             />
 
             <DialogFooter className="mt-6">

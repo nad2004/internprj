@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-
+import Image from 'next/image';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -108,7 +108,7 @@ export default function AddBookPopup({ onCancel, onAdd }: AddBookPopupProps) {
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg max-w-3/4 p-6 relative">
+      <div className="bg-white rounded-lg shadow-lg w-3/4 p-6 relative">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -145,7 +145,7 @@ export default function AddBookPopup({ onCancel, onAdd }: AddBookPopupProps) {
                   onClick={() => prefill(it)}
                   className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 text-left"
                 >
-                  <img src={it.thumbnail || '/default-cover.jpg'} alt="" width={28} height={40} />
+                  <Image src={it.thumbnail || '/default-cover.jpg'} alt="" width={28} height={40} />
                   <div className="min-w-0">
                     <div className="font-medium truncate">{it.title}</div>
                     <div className="text-xs text-gray-500 truncate">{it.author}</div>
@@ -219,7 +219,7 @@ export default function AddBookPopup({ onCancel, onAdd }: AddBookPopupProps) {
           {/* imageLinks: preview từ watch, field do RHF quản lý */}
           <input type="hidden" {...register('imageLinks')} />
           <div className="flex items-center gap-3">
-            <img
+            <Image
               src={imagePreview}
               alt="Preview cover"
               width={40}

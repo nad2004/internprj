@@ -201,23 +201,40 @@ export async function updateBookSimple(payload = {}) {
   return updated.toObject();
 }
 export async function deleteBookSimple({ id } = {}) {
-  if (!id) throw new Error('Cần id');
+    if (!id) throw new Error('Cần id');
   if (!mongoose.Types.ObjectId.isValid(id)) throw new Error('id không hợp lệ');
 
-  // Nếu đã unavailable thì trả về luôn
+  const now = new Date();
+
+  // Tìm current
   const current = await Book.findById(id);
   if (!current) throw new Error('Book not found');
+
+  // Helper: cập nhật toàn bộ instance về unavailable
+  const syncInstances = async () => {
+    await BookInstance.updateMany(
+      { $or: [{ bookId: id }, { book_id: id }], status: { $ne: 'unavailable' } },
+      { $set: { status: 'unavailable', deletedAt: now } },
+      { runValidators: true }
+    );
+  };
+
   if (current.status === 'unavailable') {
+    // Sách đã unavailable: vẫn đảm bảo instance được sync
+    await syncInstances();
     await current.populate('categories', 'name');
     return current.toObject();
   }
 
-  // Soft delete
+  // Soft delete Book
   const updated = await Book.findByIdAndUpdate(
     id,
-    { $set: { status: 'unavailable', deletedAt: new Date() } },
-    { new: true, runValidators: true },
+    { $set: { status: 'unavailable', deletedAt: now } },
+    { new: true, runValidators: true }
   );
+
+  // Sync BookInstance
+  await syncInstances();
 
   await updated.populate('categories', 'name');
   return updated.toObject();

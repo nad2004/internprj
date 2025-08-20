@@ -5,7 +5,6 @@ import { useState } from 'react';
 
 export default function BorrowingHistoryPage() {
   const [activeTab, setActiveTab] = useState<'book' | 'bookinstance'>('book');
-  const [selectedUser, setSelectedUser] = useState('');
 
   return (
     <div className="p-6">

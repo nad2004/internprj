@@ -1,4 +1,5 @@
-import { User, Settings } from 'lucide-react';
+"use client";
+import { Settings } from 'lucide-react';
 
 export default function AdminHeader() {
   const now = new Date();

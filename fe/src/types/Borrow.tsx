@@ -2,7 +2,14 @@ import type { Book } from './Books';
 import type { BookInstance } from './BookInstance';
 
 import type { User } from './User';
-export type LoanStatus = 'reserve' | 'borrowed' | 'returned' | 'overdue' | 'cooldown';
+export type LoanStatus =
+  | 'pending'
+  | 'reserve'
+  | 'borrowed'
+  | 'returned'
+  | 'overdue'
+  | 'cooldown'
+  | 'rejected';
 
 export type BorrowPayload = {
   from: { d: string; m: string; y: string };
@@ -15,6 +22,7 @@ export type BorrowPayload = {
 export interface Loan {
   _id: string;
   borrowedAt: string;
+  rejectReason: string;
   dueAt: string;
   status: LoanStatus;
   description?: string;

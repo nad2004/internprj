@@ -5,12 +5,10 @@ import * as uploadController from '../controllers/upload.controller.js';
 
 const router = Router();
 
-// Upload mới
+// POST /upload/image  -> dedupe theo nội dung (CÁCH 1)
 router.post('/image', uploadImage, uploadController.uploadSingleImage);
-router.post('/image/base64', uploadController.uploadSingleImage);
-router.post('/image/url', uploadController.uploadSingleImage);
 
-// Overwrite (ghi đè public_id hiện có)
+// Overwrite (khi đã có publicId)
 router.post('/image/overwrite', uploadImage, uploadController.overwriteImage);
 
 // Delete

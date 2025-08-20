@@ -16,27 +16,21 @@ import { Button } from '@/components/ui/button';
 
 export default function ChangePasswordDialog({ trigger }: { trigger: React.ReactNode }) {
   const [open, setOpen] = useState(false);
-  const [current, setCurrent] = useState('');
+  const [email, setEmail] = useState('');
   const [next, setNext] = useState('');
-  const [confirm, setConfirm] = useState('');
   const [saving, setSaving] = useState(false);
 
   async function handleSave() {
-    if (next !== confirm) {
-      alert('Password confirmation does not match.');
-      return;
-    }
     try {
       setSaving(true);
       // call API đổi mật khẩu của bạn
       await axios.post('/api/auth/change-password', {
-        currentPassword: current,
+        Email: email,
         newPassword: next,
       });
       setOpen(false);
-      setCurrent('');
+      setEmail('');
       setNext('');
-      setConfirm('');
       alert('Password changed.');
     } catch (e) {
       console.error(e);
@@ -56,24 +50,21 @@ export default function ChangePasswordDialog({ trigger }: { trigger: React.React
 
         <div className="grid gap-3">
           <div>
-            <Label className="mb-1 block">Current password</Label>
-            <Input type="password" value={current} onChange={(e) => setCurrent(e.target.value)} />
+            <Label className="mb-1 block">Email</Label>
+            <Input type="password" value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
           <div>
             <Label className="mb-1 block">New password</Label>
             <Input type="password" value={next} onChange={(e) => setNext(e.target.value)} />
           </div>
-          <div>
-            <Label className="mb-1 block">Confirm new password</Label>
-            <Input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
-          </div>
+         
         </div>
 
         <DialogFooter className="mt-3">
           <Button variant="ghost" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={saving || !current || !next || !confirm}>
+          <Button onClick={handleSave} disabled={saving || !email || !next }>
             {saving ? 'Saving…' : 'Save'}
           </Button>
         </DialogFooter>

@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import BookIcon from '@/icons/BookIcon.svg';
 import type { Book, Category } from '@/types/Books';
 import { categoryQueries } from '@/lib/api/category';
@@ -7,7 +7,11 @@ import { useQuery } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
 import { useUpdateBook } from '@/hooks/CRUD/useUpdateBook';
 import { Textarea } from '@/components/ui/textarea';
-
+import Image from 'next/image';
+import { Input } from '@/components/ui/input';
+import { useAuthStore } from '@/store/authStore';
+import FormOverlay from '@/components/FormOverlay';
+import axios from 'axios';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -17,7 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
+const UPLOAD_URL = 'http://localhost:8080/api/upload/image';
+const UPDATE_BOOK = () => `http://localhost:8080/api/book`;
 const schema = z.object({
   _id: z.string(),
   name: z.string().trim().min(1, 'Name is required').max(200),
@@ -99,13 +104,65 @@ export default function UpdateBookPopup({
     );
   }, [selectedBook?._id, ready, optionIds, reset]);
 
-  const imagePreview = watch('imageLinks');
+  const [imagePreview, setImagePreview] = useState(
+    toHttps(
+      selectedBook.imageLinks?.thumbnail ||'https://neelkanthpublishers.com/assets/bookcover_cover.png',
+    ),
+  );
   const { mutate, mutateAsync, isPending, isSuccess, error, data: server } = useUpdateBook();
   async function onValidSubmit(form: FormData) {
     await mutateAsync({ data: form });
     onUpdate();
   }
+    const { authStart, authSuccess } = useAuthStore();
+    const loading = useAuthStore((s) => s.loading);
+    const fileRef = useRef<HTMLInputElement>(null);
+  async function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
+    if (!file.type.startsWith('image/')) {
+      alert('Vui lòng chọn đúng file ảnh');
+      e.target.value = '';
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Ảnh quá lớn (tối đa 5MB)');
+      e.target.value = '';
+      return;
+    }
+
+    const preview = URL.createObjectURL(file);
+
+    try {
+      authStart();
+      const fd = new FormData();
+      fd.append('file', file);
+
+      const { data } = await axios.post(UPLOAD_URL, fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        withCredentials: true,
+      });
+
+      const uploadedUrl = data?.data?.url ?? data?.secure_url;
+      if (!uploadedUrl) throw new Error('Upload không trả về URL');
+      setImagePreview(uploadedUrl);
+      if (selectedBook?._id) {
+        const res = await axios.patch(
+          UPDATE_BOOK(),
+          { _id: selectedBook._id, imageLinks: {thumbnail: uploadedUrl, smallThumbnail: uploadedUrl} },
+          { withCredentials: true },
+        );
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Upload ảnh thất bại');
+    } finally {
+      authSuccess();
+      if (fileRef.current) fileRef.current.value = '';
+      URL.revokeObjectURL(preview);
+    }
+  }
   if (!ready) {
     return (
       <div className="fixed inset-0 bg-black/40 grid place-items-center">
@@ -116,11 +173,13 @@ export default function UpdateBookPopup({
 
   return (
     <>
+    
       {isPending ? 'Đang lưu...' : 'Lưu'}
       {error && <p className="text-red-600 text-sm">{(error as Error).message}</p>}
       {isSuccess && <p className="text-green-600 text-sm">Cập nhật xong!</p>}
       <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg shadow-lg w-3/4 p-6 relative">
+        <FormOverlay loading={loading} />
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
@@ -219,7 +278,7 @@ export default function UpdateBookPopup({
             {/* imageLinks (ẩn) + preview */}
             <input type="hidden" {...register('imageLinks')} />
             <div className="flex items-center gap-3">
-              <img
+              <Image
                 src={imagePreview}
                 alt="Preview cover"
                 width={40}
@@ -231,7 +290,20 @@ export default function UpdateBookPopup({
             {errors.imageLinks && (
               <p className="text-red-600 text-sm">{errors.imageLinks.message}</p>
             )}
-
+            <Input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              onChange={onPickFile}
+              onClick={(e) => ((e.target as HTMLInputElement).value = '')}
+              className="
+                h-10
+                file:mr-3 file:rounded-md file:border-0
+                file:bg-slate-100 file:px-3 file:py-2
+                file:text-sm file:font-medium file:text-slate-700
+                hover:file:bg-slate-200
+              "
+            />
             <div className="flex justify-end gap-4 mt-6">
               <button
                 type="button"

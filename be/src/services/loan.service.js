@@ -1,6 +1,40 @@
 import Loan from '../models/Loan.js';
+import Book from '../models/Book.js';
 import BookInstance from '../models/BookInstance.js';
 import mongoose from 'mongoose';
+const isObjectId = (s) => !!s && mongoose.Types.ObjectId.isValid(s);
+import { notifyLoanApproved, notifyLoanRejected } from './notification.service.js';
+export async function approveLoan({ id }) {
+  // ví dụ: pending -> reserve
+  const loan = await Loan.findOneAndUpdate(
+    { _id: id, status: 'pending' },
+    { $set: { status: 'reserve' } },
+    { new: true, runValidators: true }
+  );
+  await loan.save();
+  if (!loan) throw new Error('Loan is not approvable');
+
+  const bookInstance = await BookInstance.findById(loan.bookId).lean();
+  const book = bookInstance ? await Book.findById(bookInstance.book_id).lean() : null;
+  
+  // tạo notify
+  await notifyLoanApproved({ loan, book, bookInstance });
+  return loan;
+}
+export async function handleRejectLoan({ id, reason }) {
+  const loan = await Loan.findOneAndUpdate(
+    { _id: id, status: { $in: ['pending','reserve'] } },
+    { $set: { status: 'rejected', rejectReason: reason} },
+    { new: true, runValidators: true }
+  );
+  if (!loan) throw new Error('Loan is not rejectable');
+  await loan.save();
+  const bookInstance = await BookInstance.findById(loan.bookId).lean();
+  const book = bookInstance ? await Book.findById(bookInstance.book_id).lean() : null;
+
+  await notifyLoanRejected({ loan, book, bookInstance, reason });
+  return loan;
+}
 const populateLoan = (q) =>
   q.populate({ path: 'userId', select: 'username email' }).populate({
     path: 'bookId', // BookInstance
@@ -45,7 +79,7 @@ export const createLoan = async ({
     borrowedAt: new Date(borrowedAt),
     dueAt: new Date(dueAt),
     description: description || '',
-    status: 'reserve',
+    status: 'pending',
     pickupAt: null,
     pickupScheduledAt: null,
     cooldownUntil: null,
@@ -56,21 +90,81 @@ export const createLoan = async ({
     instance: inst.toObject(),
   };
 };
+export const getAllLoans = async (filter = {}) => {
+  const { q, userId, bookId, status, ...rest } = filter || {};
 
-export const getAllLoans = (filter = {}) => {
-  return Loan.find(filter)
-    .populate({ path: 'userId', select: 'username email' })
-    .populate({
-      path: 'bookId', // BookInstance
-      select: 'code status currentHolder book_id', // chọn field cần
-      populate: {
-        path: 'book_id', // bên trong BookInstance
-        model: 'Book',
-        select: 'title authors imageLinks', // field của Book
+  // filter cơ bản (không gồm q)
+  const match = { ...rest };
+  if (isObjectId(userId)) match.userId = new mongoose.Types.ObjectId(userId);
+  if (isObjectId(bookId)) match.bookId = new mongoose.Types.ObjectId(bookId);
+  if (status) match.status = status;
+
+  const pipeline = [
+    { $match: match },
+
+    // Loan.bookId -> BookInstance
+    { $lookup: { from: 'bookinstances', localField: 'bookId', foreignField: '_id', as: 'bookInstance' } },
+    { $unwind: { path: '$bookInstance', preserveNullAndEmptyArrays: true } },
+
+    // BookInstance.book_id -> Book
+    { $lookup: { from: 'books', localField: 'bookInstance.book_id', foreignField: '_id', as: 'book' } },
+    { $unwind: { path: '$book', preserveNullAndEmptyArrays: true } },
+
+    // Loan.userId -> User
+    { $lookup: { from: 'users', localField: 'userId', foreignField: '_id', as: 'user' } },
+    { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+  ];
+  const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  // q: nếu có và không rỗng thì search theo các field liên quan
+  if (q !== undefined) {
+    const text = String(q).trim();
+    if (text) {
+      const re = new RegExp(text, 'i');
+       const reExact = new RegExp(`^${escapeRegExp(text)}$`, 'i'); 
+      pipeline.push({
+        $match: {
+          $or: [
+            { 'user.username': reExact },
+            { 'book.title': re },
+            { 'bookInstance.code': re },
+            { status: re },
+          ],
+        },
+      });
+    }
+    // nếu q rỗng -> bỏ qua, dùng match cơ bản
+  }
+
+  // Shape kết quả gần giống populate cũ
+  pipeline.push({
+    $project: {
+      _id: 1,
+      status: 1,
+      borrowedAt: 1,
+      dueAt: 1,
+      description: 1,
+      userId: {
+        _id: '$user._id',
+        username: '$user.username',
+        email: '$user.email',
       },
-    })
-    .lean()
-    .exec();
+      bookId: {
+        _id: '$bookInstance._id',
+        code: '$bookInstance.code',
+        status: '$bookInstance.status',
+        currentHolder: '$bookInstance.currentHolder',
+        book_id: {
+          _id: '$book._id',
+          title: '$book.title',
+          authors: '$book.authors',
+          imageLinks: '$book.imageLinks',
+          slug: '$book.slug',
+        },
+      },
+    },
+  });
+
+  return await Loan.aggregate(pipeline).exec();
 };
 
 export const nextStep = async (loanId, { cooldownUntil = null } = {}) => {
@@ -83,12 +177,17 @@ export const nextStep = async (loanId, { cooldownUntil = null } = {}) => {
   const now = new Date();
 
   switch (loan.status) {
+ case 'pending': {
+      approveLoan({ id: loan._id });
+      break;
+    }
+
     case 'reserve': {
       // chuyển sang borrowed, set pickupAt
       // đảm bảo instance ở trạng thái borrowed & holder = user
       await BookInstance.findByIdAndUpdate(
         loan.bookId._id,
-        { $set: { status: 'borrowed', currentHolder: loan.userId } },
+        { $set: { status: 'borrowed', currentHolder: loan.userId, pickupAt: Date.now() } },
         { new: true, runValidators: true },
       );
       loan.status = 'borrowed';
@@ -126,16 +225,10 @@ export const nextStep = async (loanId, { cooldownUntil = null } = {}) => {
   return await populateLoan(Loan.findById(loan._id)).lean().exec();
 };
 
-/** Lấy chi tiết theo ID */
 export const getLoanById = (id) => Loan.findById(id).populate('bookId').populate('userId').exec();
 
-/** Cập nhật đơn (dueAt, status, v.v.) */
-export const updateLoan = (id, data) => Loan.findByIdAndUpdate(id, data, { new: true }).exec();
-
-/** Xóa đơn */
 export const deleteLoan = (id) => Loan.findByIdAndDelete(id).exec();
 
-/** Đánh dấu trả sách */
 export const markReturned = async (loanId, returnedAt = new Date()) => {
   if (!mongoose.Types.ObjectId.isValid(loanId)) throw new Error('loanId không hợp lệ');
 
@@ -156,11 +249,10 @@ export const markReturned = async (loanId, returnedAt = new Date()) => {
 
   return await populateLoan(Loan.findById(loan._id)).lean().exec();
 };
-
-/** Admin: xác nhận cho mượn */
-export const confirmLoan = (id) => updateLoan(id, { status: 'confirmed' });
-
-/** Admin: bắt đầu giai đoạn cooldown (mặc định 3 ngày sau) */
+export const rejectLoan = async (loanId, reason) => {
+  if (!mongoose.Types.ObjectId.isValid(loanId)) throw new Error('loanId không hợp lệ');
+  return await handleRejectLoan({ id: loanId, reason });
+};
 export const startCooldown = (id, cooldownUntil = null) => {
   const until = cooldownUntil ? cooldownUntil : new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
   return updateLoan(id, {

@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
+import { useDebounce } from '@/hooks/useDebounce';
 import { useQuery } from '@tanstack/react-query';
 import GenericTable from '@/app/admin/GenericTable';
 import Input from '@/components/SearchInput';
@@ -21,28 +22,16 @@ const statusClass: Record<string, string> = {
   returned: 'bg-green-100 text-green-800',
   overdue: 'bg-red-100 text-red-800',
   cooldown: 'bg-purple-100 text-purple-800',
+  rejected: 'bg-red-200 text-red-600',
 };
 
 export default function BorrowingPage() {
   const [query, setQuery] = useState('');
-
+    const debouncedQuery = useDebounce(query, 400);
   // 🔎 Fetch all loans
-  const { data, isLoading, isError, error } = useQuery({ ...loanQueries.all() });
-  const items: Loan[] = data ?? [];
-  // 🔍 Client-side filtering for quick search by book, user, code, note
-  const filtered: Loan[] = useMemo(() => {
-    if (!query) return items;
-    const q = query.toLowerCase();
-    return items.filter((l) => {
-      const bookTitle = (l as Loan)?.bookId?.book_id?.title || '';
-      const userName = (l as Loan)?.userId?.username || '';
-      const desc = l.description || '';
-      return [bookTitle, userName, desc, l.status, l.borrowedAt, l.dueAt]
-        .join(' ')
-        .toLowerCase()
-        .includes(q);
-    });
-  }, [items, query]);
+  const { data, isLoading, isError, error } = useQuery({ ...loanQueries.list({
+      q: debouncedQuery || '',
+    }) });  
 
   // 🧱 Columns for GenericTable
   const loanColumns = [
@@ -92,7 +81,7 @@ export default function BorrowingPage() {
       key: 'description',
       header: 'Note',
       width: '280px',
-      render: (l: Loan) => l.description || '—',
+      render: (l: Loan) => <div className='truncate'>{l.description || '—'}</div>,
     },
     {
       key: 'action',
@@ -127,7 +116,7 @@ export default function BorrowingPage() {
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search by book, user, code, status, date…"
+          placeholder="Search by book, user, code, status, ..."
           className="w-full"
         />
       </div>
@@ -138,17 +127,16 @@ export default function BorrowingPage() {
         </div>
       )}
       <div className="text-sm text-gray-600">
-        {isLoading ? 'Loading…' : `Showing ${filtered.length} record(s)`}
+        {isLoading ? 'Loading…' : `Showing ${(data?.length ?? 0)} record(s)`}
       </div>
 
-      <GenericTable<Loan> data={filtered} columns={loanColumns} />
+      <GenericTable<Loan> data={data ?? []} columns={loanColumns} />
       {showUpdate && selectedLoan && (
         <>
           <UpdateLoanTracking
             open={showUpdate}
             selectedLoan={selectedLoan}
             onCancel={() => setShowUpdate(false)}
-            onUpdate={() => {}}
           />
         </>
       )}

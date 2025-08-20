@@ -165,9 +165,9 @@ export default function BookDetailView({ book }: { book: Book }) {
           {/* Actions – 2 nút to, Read Now có khối icon bên phải */}
           <div className="mt-auto pt-6 flex flex-wrap gap-4">
             <BorrowDialog
-              bookId={book._id || ''}
+              bookId={book._id || ''}   
               trigger={
-                <button className="h-12 bg-[#F76B56] px-10 text-[15px] font-semibold text-white hover:brightness-95">
+                <button disabled={book.status === 'unavailable'} className="h-12 bg-[#F76B56] px-10 text-[15px] font-semibold text-white hover:brightness-95">
                   BORROW
                 </button>
               }

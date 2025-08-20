@@ -39,6 +39,7 @@ export default function SearchPage() {
     ...booksQueries.list({
       search: query || '',
       category,
+      status: 'available',
       page,
       limit,
       sort,
