@@ -95,7 +95,7 @@ export default function RegisterForm() {
             <label className="mb-1 block text-xs font-medium text-slate-600">Name</label>
             <input
               {...register('username')}
-              placeholder="College Reg. No. / Name"
+              placeholder="User Name"
               className={inputCls}
             />
             {errors.username && (
@@ -105,11 +105,11 @@ export default function RegisterForm() {
 
           <div>
             <label className="mb-1 block text-xs font-medium text-slate-600">
-              College Email ID
+              Email
             </label>
             <input
               {...register('email')}
-              placeholder="username@collegename.ac.in"
+              placeholder="username@email.com"
               className={inputCls}
             />
             {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>}

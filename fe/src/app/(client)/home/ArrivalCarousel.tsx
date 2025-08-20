@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Autoplay from 'embla-carousel-autoplay';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import type { Book } from '@/types/Books';
-
+import { useRouter } from 'next/navigation';
 type Props = {
   books: Book[];
   label?: string;
@@ -20,6 +20,8 @@ export default function ArrivalCarousel({
   delay = 2000,
 }: Props) {
   // Giữ 1 instance plugin và CHO PHÉP reset sau tương tác
+    const router = useRouter();
+
   const plugin = useRef(
     Autoplay({
       delay,
@@ -28,6 +30,9 @@ export default function ArrivalCarousel({
     }),
   );
 
+  const handleClick = (slug: string) => {
+    router.push(`/search/${slug}`);
+  };
   return (
     <div className="relative self-start w-1/2 rounded-2xl border-[1.5px] border-[#E9D7FB] bg-white shadow-sm">
       {/* Label dọc */}
@@ -54,7 +59,7 @@ export default function ArrivalCarousel({
               b.imageLinks?.smallThumbnail ||
               '/images/placeholder-book.png';
             return (
-              <CarouselItem key={b._id} className="basis-1/5 pl-3">
+              <CarouselItem key={b._id} className="basis-1/5 pl-3" onClick={() => handleClick(b.slug)}>
                 <div className="mx-auto w-[130px] sm:w-[140px] md:w-[150px] rounded-xl border border-slate-200 bg-white p-2 shadow-sm">
                   <div
                     className="relative overflow-hidden rounded-lg"

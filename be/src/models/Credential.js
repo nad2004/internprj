@@ -11,13 +11,16 @@ const CredentialSchema = new mongoose.Schema({
     enum: ['local', 'google'],
     required: true,
   },
+  // Chỉ local mới cần passwordHash
   passwordHash: {
     type: String,
-    default: null,
+    required: function () { return this.provider === 'local'; },
+    default: undefined,      // đừng lưu null
   },
   providerUserId: {
     type: String,
-    default: null,
+    required: function () { return this.provider === 'google'; },
+    set: v => (v == null || v === '' ? undefined : v), // không lưu null/""
   },
   createdAt: {
     type: Date,
@@ -25,7 +28,18 @@ const CredentialSchema = new mongoose.Schema({
   },
 });
 
-// đảm bảo mỗi (provider, providerUserId) là duy nhất
-CredentialSchema.index({ provider: 1, providerUserId: 1 }, { unique: true, sparse: true });
+// ✅ Chỉ unique khi provider = 'google' và providerUserId là string
+CredentialSchema.index(
+  { provider: 1, providerUserId: 1 },
+  {
+    name: 'uniq_google_providerUserId',
+    unique: true,
+    partialFilterExpression: {
+      provider: 'google',
+      providerUserId: { $type: 'string' },
+    },
+  }
+);
 
-export default mongoose.model('Credential', CredentialSchema);
+export default mongoose.models.Credential
+  || mongoose.model('Credential', CredentialSchema);

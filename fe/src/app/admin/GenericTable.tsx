@@ -21,7 +21,7 @@ function GenericTable<T>({ data, columns, onEdit, onDelete, onView, className }:
     <div
       className={`overflow-x-auto rounded-lg border border-gray-200 shadow-sm bg-white ${className}`}
     >
-      <table className="min-w-full table-fixed text-sm text-left text-gray-900">
+      <table className="w-full table-fixed text-sm text-left text-gray-900">
         <thead>
           <tr className="border-b border-black">
             {columns.map((col) => (

@@ -27,10 +27,58 @@ import { Button } from '@/components/ui/button';
 import { useUserStore, UserState } from '@/store/userStore';
 import ClientFilter from '@/icons/ClientFilter.svg';
 import Success from '@/icons/Success.svg';
-
+import { z } from "zod";
 import type { BorrowPayload } from '@/types/Borrow';
 
 type View = 'form' | 'success';
+type DMY = { d: string; m: string; y: string };
+const toDate = (p: DMY) =>
+  new Date(Number(p.y), Number(p.m) - 1, Number(p.d), 0, 0, 0, 0);
+const isValidDMY = (p: DMY) => {
+  const d = toDate(p);
+  return (
+    d.getFullYear() === Number(p.y) &&
+    d.getMonth() === Number(p.m) - 1 &&
+    d.getDate() === Number(p.d)
+  );
+};
+const startOfToday = (() => {
+  const t = new Date();
+  t.setHours(0, 0, 0, 0);
+  return t;
+})();
+
+/* Zod schema */
+const dmySchema = z
+  .object({
+    d: z.string().regex(/^\d{2}$/),
+    m: z.string().regex(/^\d{2}$/),
+    y: z.string().regex(/^\d{4}$/),
+  })
+  .refine(isValidDMY, "Invalid date");
+
+const BorrowPayloadSchema = z
+  .object({
+    from: dmySchema,
+    to: dmySchema,
+    serial: z.string().min(1, "Serial is required"),
+    userId: z.string().min(1, "User is required"),
+    bookInstanceId: z.string().min(1, "BookInstance is required"),
+    description: z.string().optional(),
+  })
+  .superRefine(({ from, to }, ctx) => {
+    const f = toDate(from);
+    const t = toDate(to);
+    if (f < startOfToday) {
+      ctx.addIssue({ code: "custom", path: ["from"], message: "From cannot be in the past" });
+    }
+    if (t < startOfToday) {
+      ctx.addIssue({ code: "custom", path: ["to"], message: "To cannot be in the past" });
+    }
+    if (t < f) {
+      ctx.addIssue({ code: "custom", path: ["to"], message: "To must be on or after From" });
+    }
+  });
 
 export default function BorrowDialog({
   bookId,
@@ -43,6 +91,7 @@ export default function BorrowDialog({
   const [open, setOpen] = React.useState(false);
   const [view, setView] = React.useState<View>('form');
   const profile = useUserStore((u) => (u as UserState).profile);
+
   /** Date options */
   const days = React.useMemo(
     () => Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0')),
@@ -110,6 +159,52 @@ export default function BorrowDialog({
     else setView('form');
   }
 
+  /** ----- Disable logic cho input ngày ----- */
+  const now = React.useMemo(() => {
+    const d = new Date(); d.setHours(0,0,0,0);
+    return { y: d.getFullYear(), m: d.getMonth() + 1, d: d.getDate() };
+  }, []);
+
+  // From: cấm chọn quá khứ (so với hôm nay)
+  const disabledFromMonths = React.useMemo(() => {
+    const s = new Set<string>();
+    if (Number(fromY) === now.y) {
+      for (let m = 1; m < now.m; m++) s.add(String(m).padStart(2, '0'));
+    }
+    return s;
+  }, [fromY, now]);
+
+  const disabledFromDays = React.useMemo(() => {
+    const s = new Set<string>();
+    if (Number(fromY) === now.y && Number(fromM) === now.m) {
+      for (let d = 1; d < now.d; d++) s.add(String(d).padStart(2, '0'));
+    }
+    return s;
+  }, [fromY, fromM, now]);
+
+  // To: cấm chọn < From
+  const disabledToYears = React.useMemo(() => {
+    const s = new Set<string>();
+    for (const y of years) if (Number(y) < Number(fromY)) s.add(y);
+    return s;
+  }, [years, fromY]);
+
+  const disabledToMonths = React.useMemo(() => {
+    const s = new Set<string>();
+    if (Number(toY) === Number(fromY)) {
+      for (let m = 1; m < Number(fromM); m++) s.add(String(m).padStart(2, '0'));
+    }
+    return s;
+  }, [toY, fromY, fromM]);
+
+  const disabledToDays = React.useMemo(() => {
+    const s = new Set<string>();
+    if (Number(toY) === Number(fromY) && Number(toM) === Number(fromM)) {
+      for (let d = 1; d < Number(fromD); d++) s.add(String(d).padStart(2, '0'));
+    }
+    return s;
+  }, [toY, toM, fromY, fromM, fromD]);
+
   async function handleSubmit() {
     if (borrowDisabled) return;
     const payload: BorrowPayload = {
@@ -118,14 +213,19 @@ export default function BorrowDialog({
       serial,
       description: desc,
       userId: profile?._id || '',
-      bookInstanceId: availableDetail._id,
+      bookInstanceId: (availableDetail as any)?._id,
     };
+
+    // ✅ Validate đầu vào bằng Zod trước khi gọi API
+    const parsed = BorrowPayloadSchema.safeParse(payload);
+    if (!parsed.success) {
+      alert(parsed.error.issues[0]?.message ?? "Invalid date");
+      return;
+    }
+
     try {
-      console.log(payload);
       await createLoan.mutateAsync(payload);
       setView('success');
-      // Tùy chọn: tự đóng sau 1.2s
-      // setTimeout(() => setOpen(false), 1200);
     } catch {
       // (có thể toast lỗi ở đây)
     }
@@ -187,17 +287,17 @@ export default function BorrowDialog({
             {/* From */}
             <div className="mb-3 text-[13px] font-medium text-slate-700">From</div>
             <div className="mb-4 grid grid-cols-3 gap-3">
-              <DateSelect value={fromD} onChange={setFromD} items={days} className={pill} />
-              <DateSelect value={fromM} onChange={setFromM} items={months} className={pill} />
-              <DateSelect value={fromY} onChange={setFromY} items={years} className={pill} />
+              <DateSelect value={fromD} onChange={setFromD} items={days}   className={pill} disabledValues={disabledFromDays} />
+              <DateSelect value={fromM} onChange={setFromM} items={months} className={pill} disabledValues={disabledFromMonths} />
+              <DateSelect value={fromY} onChange={setFromY} items={years}  className={pill} />
             </div>
 
             {/* To */}
             <div className="mb-3 text-[13px] font-medium text-slate-700">To</div>
             <div className="mb-4 grid grid-cols-3 gap-3">
-              <DateSelect value={toD} onChange={setToD} items={days} className={pill} />
-              <DateSelect value={toM} onChange={setToM} items={months} className={pill} />
-              <DateSelect value={toY} onChange={setToY} items={years} className={pill} />
+              <DateSelect value={toD} onChange={setToD} items={days}   className={pill} disabledValues={disabledToDays} />
+              <DateSelect value={toM} onChange={setToM} items={months} className={pill} disabledValues={disabledToMonths} />
+              <DateSelect value={toY} onChange={setToY} items={years}  className={pill} disabledValues={disabledToYears} />
             </div>
 
             {/* Serial (đọc-chỉ, sync từ API) */}
@@ -254,11 +354,13 @@ function DateSelect({
   onChange,
   items,
   className,
+  disabledValues,
 }: {
   value: string;
   onChange: (v: string) => void;
   items: string[];
   className?: string;
+  disabledValues?: Set<string>;
 }) {
   return (
     <Select value={value} onValueChange={onChange}>
@@ -267,7 +369,7 @@ function DateSelect({
       </SelectTrigger>
       <SelectContent className="max-h-64">
         {items.map((i) => (
-          <SelectItem key={i} value={i}>
+          <SelectItem key={i} value={i} disabled={disabledValues?.has(i)}>
             {i}
           </SelectItem>
         ))}

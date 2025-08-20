@@ -81,7 +81,7 @@ export default function BorrowingPage() {
       key: 'description',
       header: 'Note',
       width: '280px',
-      render: (l: Loan) => <div className='truncate'>{l.description || '—'}</div>,
+      render: (l: Loan) => <span className='overflow-ellipsis'>{l.description || '—'}</span>,
     },
     {
       key: 'action',

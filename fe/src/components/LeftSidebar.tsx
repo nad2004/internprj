@@ -15,12 +15,12 @@ type MenuItem = {
 export default function LeftSidebar({ menuItems }: { menuItems?: MenuItem[] }) {
   const [collapsed, setCollapsed] = useState(false);
   const profile = useUserStore((state) => state.profile);
-  const handleLogout = useLogout(profile?.id || '');
+  const handleLogout = useLogout(profile?._id || '');
   return (
     <aside
       className={`${
         collapsed ? 'w-20' : 'w-64'
-      } bg-black text-white flex flex-col min-h-screen transition-all duration-300`}
+      } bg-slate-900 text-white flex flex-col min-h-screen transition-all duration-300`}
     >
       <button
         onClick={() => setCollapsed(!collapsed)}
@@ -29,7 +29,7 @@ export default function LeftSidebar({ menuItems }: { menuItems?: MenuItem[] }) {
         <Menu className="w-5 h-5" />
       </button>
       {/* User info */}
-      <div className="flex items-center gap-3 p-3 rounded-t-lg bg-[#18191b]">
+      <div className="flex items-center gap-3 p-3 rounded-t-lg bg-slate-900">
         <Avatar className="w-10 h-10 border border-gray-700">
           <AvatarImage key={profile?.avatar} src={profile?.avatar} alt="User" />
           <AvatarFallback>{profile?.username?.[0]?.toUpperCase() || 'U'}</AvatarFallback>

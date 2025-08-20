@@ -39,7 +39,7 @@ export default function BookDetailView({ book }: { book: Book }) {
         : '';
 
   const isAvailable = (book.status ?? 'available') === 'available';
-  const statusLabel = isAvailable ? 'In-Shelf' : 'Borrowed';
+  const statusLabel = isAvailable ? 'In-Shelf' : 'Unavailable';
   const location = 'CS A-15';
   const rating = book.averageRating ?? 5;
   return (

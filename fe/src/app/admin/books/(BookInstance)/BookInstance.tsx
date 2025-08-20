@@ -107,7 +107,7 @@ export default function BookInstancePage() {
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebounce(query, 400);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(20);
+  const [limit, setLimit] = useState(10);
   const [sort, setSort] = useState('-createdAt');
 
   const { data, isError, isLoading, isRefetching, error } = useQuery({

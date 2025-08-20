@@ -87,7 +87,7 @@ export default function BookOverviewPage() {
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebounce(query, 400);
   const [page, setPage] = useState(1); // 1-based
-  const [limit, setLimit] = useState(20);
+  const [limit, setLimit] = useState(10);
   const [sort, setSort] = useState('-createdAt'); // nếu cần UI đổi sort thì thêm Select
 
   // Fetch: API trả { items, pagination: { total, page, limit, pages } }
@@ -131,7 +131,7 @@ export default function BookOverviewPage() {
   }
 
   return (
-    <div className="p-6 max-w-full space-y-4">
+    <div className="p-6 max-w-full space-y-4 min-h-screen">
       {/* Search bar */}
       <BodyHeader
         title="Book Management"

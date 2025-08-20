@@ -7,12 +7,9 @@ const isObjectId = (s) => !!s && mongoose.Types.ObjectId.isValid(s);
 export async function getAllNotifyByUser({ userId }) {
   if (!isObjectId(userId)) throw new Error('Invalid userId');
 
-  const q = { userId };
-  const sort = { readAt: 1, createdAt: -1 };
-
-  const [data, total] = await Promise.all([
-    Notification.find(q)
-      .sort(sort)
+  // helper để reuse populate
+  const populateAll = (q) =>
+    q
       .populate({ path: 'userId', select: 'username email' })
       .populate({ path: 'resource.id', model: 'Loan', select: 'status pickupBy dueAt rejectedAt createdAt' })
       .populate({
@@ -22,11 +19,24 @@ export async function getAllNotifyByUser({ userId }) {
         populate: { path: 'book_id', model: 'Book', select: 'title authors imageLinks slug' },
       })
       .populate({ path: 'resource.bookId', model: 'Book', select: 'title authors imageLinks slug' })
-      .lean({ virtuals: true }) // Mongoose ≥7 để có virtual isRead
-      .exec(),
-    Notification.countDocuments({ ...q, readAt: null }) 
+      .lean({ virtuals: true })
+      .exec();
+
+  const [unread, read, total] = await Promise.all([
+    // Unread trước, sort theo createdAt ↓
+    populateAll(
+      Notification.find({ userId, readAt: null }).sort({ createdAt: -1 })
+    ),
+    // Read sau, sort theo createdAt ↓
+    populateAll(
+      Notification.find({ userId, readAt: { $ne: null } }).sort({ createdAt: -1 })
+    ),
+    // Tổng CHƯA đọc
+    Notification.countDocuments({ userId, readAt: null }),
   ]);
-  return { data, total };
+
+  const data = [...unread, ...read];
+  return { data, total }; // total = số chưa đọc
 }
 
 export async function notifyLoanApproved({ loan, book, bookInstance }) {

@@ -14,7 +14,10 @@ export default function HomeContent() {
     isError,
     error,
   } = useQuery({
-    ...booksQueries.list(),
+    ...booksQueries.list({
+      status: 'available',
+      limit: 30,
+    }),
     select: (res) => res.items as Book[],
   });
 
@@ -26,7 +29,7 @@ export default function HomeContent() {
 
   const newArrivals = items.slice(0, 10);
   const recommended = items.slice(10, 20);
-  const recent = items.slice(10, 20);
+  const recent = items.slice(20, 30);
 
   return (
     <div className="space-y-8 m-4">
