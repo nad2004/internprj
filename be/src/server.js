@@ -1,5 +1,5 @@
 import cors from 'cors';
-import './jobs/deleteUnverifiedUsers.js';
+
 import express from 'express';
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
@@ -45,7 +45,7 @@ app.use(
 app.options("*", cors());
 
 connectDB();
-
+import './jobs/deleteUnverifiedUsers.js';
 app.use('/api/book', bookRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/category', categoryRoutes);
@@ -55,7 +55,7 @@ app.use('/api/google', googleRoutes);
 app.use('/api/loan', loanRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/notify', notificationRoutes);
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 8080;
 
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 app.use(errorHandler);
