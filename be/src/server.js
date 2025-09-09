@@ -20,7 +20,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: ['http://localhost:3000', 'https://sneaker-omega.vercel.app'], 
+    origin: ['http://localhost:3000', 'https://internprj.vercel.app'], 
     credentials: true,
   }),
 );
