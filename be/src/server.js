@@ -18,12 +18,31 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
+const allowedOrigins = [
+  "http://localhost:3000",    
+  "https://sneaker-omega.vercel.app" 
+];
+
 app.use(
   cors({
-    origin: 'http://localhost:3000',
-    credentials: true,
-  }),
+    origin: function (origin, callback) {
+      // Cho phép request không có origin (Postman, server-to-server)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true, // cho phép cookie, Authorization header
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
 );
+
+// Cho phép preflight request (OPTIONS)
+app.options("*", cors());
 
 connectDB();
 

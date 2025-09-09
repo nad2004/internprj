@@ -61,7 +61,6 @@ export async function loginLocal({ email, password }) {
     err.status = 400;
     throw err;
   }
-console.log('Checking password for user:', cred);
   const valid = await bcrypt.compare(password, cred.passwordHash);
     
   if (!valid) {
