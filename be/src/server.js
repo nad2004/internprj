@@ -14,6 +14,7 @@ import notificationRoutes from './routes/notification.routes.js';
 import bookInstanceRoutes from './routes/bookInstance.routes.js';
 import cookieParser from 'cookie-parser';
 import errorHandler from './middleware/errorHandler.js';
+import './jobs/deleteUnverifiedUsers.js';
 dotenv.config();
 const app = express();
 app.use(express.json());
@@ -45,7 +46,7 @@ app.use(
 app.options("*", cors());
 
 connectDB();
-import './jobs/deleteUnverifiedUsers.js';
+
 app.use('/api/book', bookRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/category', categoryRoutes);
